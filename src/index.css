@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import 'tw-elements/css/tw-elements.min.css';
+@import "tailwindcss";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Outfit", sans-serif;
+}
+
+:root {
+  --color-primary: rgb(4, 4, 163);
+  --color-secondary: #04B4EA;
+}
+
+.bg-color-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-color-secondary {
+  background-color: var(--color-secondary);
+}
+
+.color-primary {
+  color: var(--color-primary);
+}
+
+.color-secondary {
+  color: var(--color-secondary);
+}
+
+
+body {
+  background-color: #f0f2f5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.container {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.bg-gradient {
+  background: #105169;
+  background: linear-gradient(90deg, rgba(16, 81, 105, 1) 0%, rgba(18, 90, 110, 1) 16%, rgba(4, 180, 234, 1) 100%);
+}
+
+.text-error {
+  color: red;
+}
+
+.no-desktop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .no-desktop {
+    display: block;
+  }
+
+  .no-mobile {
+    display: none;
+  }
+
+}
