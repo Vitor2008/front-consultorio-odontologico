@@ -1,47 +1,31 @@
+import { useState } from 'react'
 import './Login.css'
 import banner_login from '../../assets/Img/banner-login.png'
+import FormLogin from '../FormLogin/FormLogin'
+import logo from '../../assets/Img/logo.png'
 
 const Login = () => {
+
+    const [tipoForm, setTipoForm] = useState<'login' | 'register'>('login');
+
     return (
         <div className="login">
 
             <div className='banner-login'>
-                <h1>Consultório Odontológico</h1>
-                <img src={banner_login} width={600} alt='banner-login' />
+                <div className='flex'>
+                    <img src={logo} width={70} alt='logo' />
+                    <div className='text'>
+                        <h1>Clínica OdontoVida</h1>
+                        <p>Cuidando do seu sorriso com excelência e dedicação</p>
+                    </div>
+                </div>
+                <img src={banner_login} width={550} alt='banner-login' />
             </div>
 
             <div className='form-login'>
-                <form className="form">
-                    <p className="title">Register </p>
-                    <p className="message">Signup now and get full access to our app. </p>
-                    <div className="flex">
-                        <label>
-                            <input placeholder="" type="text" className="input" required />
-                            <span>Firstname</span>
-                        </label>
 
-                        <label>
-                            <input placeholder="" type="text" className="input" required />
-                            <span>Lastname</span>
-                        </label>
-                    </div>
+                <FormLogin tipo={tipoForm} onTrocarTipo={() => setTipoForm(tipoForm === 'login' ? 'register' : 'login')} />
 
-                    <label>
-                        <input placeholder="" type="email" className="input" required />
-                        <span>Email</span>
-                    </label>
-
-                    <label>
-                        <input placeholder="" type="password" className="input" required />
-                        <span>Password</span>
-                    </label>
-                    <label>
-                        <input placeholder="" type="password" className="input" required />
-                        <span>Confirm password</span>
-                    </label>
-                    <button className="submit">Submit</button>
-                    <p className="signin">Already have an acount ? <a href="#">Signin</a> </p>
-                </form>
             </div>
 
         </div>
