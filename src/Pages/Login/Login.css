@@ -1,3 +1,4 @@
+
 .login {
     display: flex;
     justify-content: center;
@@ -47,4 +48,27 @@
     align-items: center;
     width: 50%;
     height: 100vh;
+}
+
+@media (max-width: 764px) {
+
+    .login {
+        flex-direction: column;
+        padding: 20px 0;
+        height: auto;
+    }
+
+    .banner-login{
+        width: 100%;
+        padding: 25px;
+    }
+
+    .banner-login .flex {
+       flex-direction: column;
+    }
+
+    .form-login {
+        width: 90%;
+        height: auto;
+    }
 }

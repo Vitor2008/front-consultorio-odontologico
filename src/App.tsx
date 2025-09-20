@@ -1,33 +1,26 @@
-// import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-// import ScrollToTop from "./Helper/ScrollToTop"
-// import { Suspense, lazy } from "react"
-import { lazy } from "react";
+import { Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import Layout from './Pages/Layout/Layout'
+import Home from './Pages/Home/Home'
 
-const Login = lazy(() => import("./Components/Login/Login"));
-
-// import Loader from "./Components/Loader/Loader";
-
-// function DefaultLayout() {
-//   return (
-//     <>
-//       <Login />
-
-//     </>
-//   );
-// }
-
-// function DetalhesLayout() {
-//   return (
-//     <>
-//       <Login />
-//     </>
-//   );
-// }
+const Login = lazy(() => import('./Pages/Login/Login'))
 
 function App() {
   return (
-    <Login />
-  );
+    <Suspense fallback={<div>Carregando...</div>}>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/home"
+          element={
+            <Layout>
+              <Home />
+            </Layout>
+          }
+        />
+      </Routes>
+    </Suspense>
+  )
 }
 
-export default App;
+export default App

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './FormLogin.css'
 import { realizarLogin, cadastrarUsuario } from '../../Services/LoginService'
 
@@ -17,13 +18,16 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
     const [senha, setSenha] = useState('');
     const [mensagem, setMensagem] = useState('');
 
+    const navigate = useNavigate()
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         const resposta = await realizarLogin(email, senha);
 
         if (resposta.status === 'success') {
             setMensagem(resposta.message);
-            // Aqui você pode redirecionar ou salvar dados no localStorage, etc.
+            localStorage.setItem('usuario', JSON.stringify(resposta.data))
+            navigate('/home')
         } else {
             setMensagem(resposta.message);
         }

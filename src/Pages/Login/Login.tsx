@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import './Login.css'
+import { useState } from 'react'
 import banner_login from '../../assets/Img/banner-login.png'
-import FormLogin from '../FormLogin/FormLogin'
+import FormLogin from '../../Components/FormLogin/FormLogin'
 import logo from '../../assets/Img/logo.png'
 
 const Login = () => {
