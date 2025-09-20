@@ -1,7 +1,11 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Layout from './Pages/Layout/Layout'
-import Home from './Pages/Home/Home'
+import Consultas from './Pages/Consultas/Consultas'
+import Pacientes from './Pages/Pacientes/Pacientes'
+import Medicos from './Pages/Medicos/Medicos'
+import Financeiro from './Pages/Financeiro/Financeiro'
+import Configuracoes from './Pages/Configuracoes/Configuracoes'
 
 const Login = lazy(() => import('./Pages/Login/Login'))
 
@@ -11,10 +15,42 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="/home"
+          path="/consultas"
           element={
             <Layout>
-              <Home />
+              <Consultas />
+            </Layout>
+          }
+        />
+        <Route
+          path="/pacientes"
+          element={
+            <Layout>
+              <Pacientes />
+            </Layout>
+          }
+        />
+        <Route
+          path="/medicos"
+          element={
+            <Layout>
+              <Medicos />
+            </Layout>
+          }
+        />
+        <Route
+          path="/financeiro"
+          element={
+            <Layout>
+              <Financeiro />
+            </Layout>
+          }
+        />
+        <Route
+          path="/configuracoes"
+          element={
+            <Layout>
+              <Configuracoes />
             </Layout>
           }
         />

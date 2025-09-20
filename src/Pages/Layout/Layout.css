@@ -1,0 +1,35 @@
+.layout-content {
+  margin-left: 220px;
+}
+
+.layout-header {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 25px 35px;
+  height: 60px;
+  gap: 15px;
+}
+
+.layout-header span {
+  color: #2c3e50;
+}
+
+.layout-header button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.layout-header button:hover {
+  background-color: #c0392b;
+}
+
+.layout-main {
+  padding: 20px;
+}

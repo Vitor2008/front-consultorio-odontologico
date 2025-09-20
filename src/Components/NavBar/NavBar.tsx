@@ -1,13 +1,18 @@
 import './NavBar.css'
+import logo from '../../assets/Img/logo.png'
 
 const NavBar = () => {
     return (
         <div className="navbar">
-            <h2 className="logo">OdontoVida</h2>
+            <div className='flex'>
+                <img src={logo} width={40} alt='logo' />
+                <h2 className="logo">OdontoVida</h2>
+            </div>
             <ul className="nav-links">
-                <li><a href="/dashboard">Dashboard</a></li>
-                <li><a href="/pacientes">Pacientes</a></li>
                 <li><a href="/consultas">Consultas</a></li>
+                <li><a href="/pacientes">Pacientes</a></li>
+                <li><a href="/medicos">Médicos</a></li>
+                <li><a href="/financeiro">Financeiro</a></li>
                 <li><a href="/configuracoes">Configurações</a></li>
             </ul>
         </div>

@@ -10,8 +10,8 @@
 }
 
 :root {
-  --color-primary: rgb(135, 175, 248);
-  --color-secondary: #04B4EA;
+  --color-primary: #04B4EA;
+  --color-secondary: #03216e;
 }
 
 .bg-color-primary {
@@ -28,11 +28,6 @@
 
 .color-secondary {
   color: var(--color-secondary);
-}
-
-
-body {
-  background-color: #f0f2f5;
 }
 
 a {

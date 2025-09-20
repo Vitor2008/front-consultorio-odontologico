@@ -27,7 +27,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
         if (resposta.status === 'success') {
             setMensagem(resposta.message);
             localStorage.setItem('usuario', JSON.stringify(resposta.data))
-            navigate('/home')
+            navigate('/consultas')
         } else {
             setMensagem(resposta.message);
         }
