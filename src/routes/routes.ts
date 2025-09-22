@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { criarConsulta } from "../Services/ConsultaService"
 import {
   cadastrarUsuario,
   pegarConsultas,
@@ -14,13 +15,21 @@ interface ICadastroBody {
   senha: string;
 }
 
+interface DadosAtualizacaoConsulta {
+    data?: string;
+    hora_inicio?: string;
+    hora_fim?: string;
+    paciente?: string;
+    medico?: string;
+    observacoes?: string;
+}
+
 interface ILoginBody {
   email: string;
   senha: string;
 }
 
 export default async function routes(app: FastifyInstance) {
-  console.log("Entrou em routes");
   // Cadastrar Usuário
   app.post(
     "/cadastrar-usuario",
@@ -39,7 +48,6 @@ export default async function routes(app: FastifyInstance) {
           dataNascimento,
           senha
         );
-        console.log("Status cadastrar: ", result.status);
         if (result.status === "error") {
           return reply.status(400).send(result);
         }
@@ -90,4 +98,29 @@ export default async function routes(app: FastifyInstance) {
         .send({ status: "error", message: "Erro interno." });
     }
   });
+
+  // Criar consultas
+  app.post("/consultas", async (
+      request: FastifyRequest<{ Body: DadosAtualizacaoConsulta }>,
+      reply: FastifyReply
+    ) => {
+    try {
+        const { data, hora_inicio, hora_fim, medico, paciente, observacoes } =
+          request.body;
+
+        const result = await criarConsulta(data, hora_inicio, hora_fim, paciente, medico, observacoes)
+
+        if (result.status === "error") {
+          return reply.status(400).send(result);
+        }
+        return reply.status(201).send(result);
+    } catch (error) {
+      console.error("Erro no endpoint /consultas:", error);
+      return reply 
+        .status(500)
+        .send({ status: "error", message: "Erro interno." });
+    }
+  });
+
+
 }
