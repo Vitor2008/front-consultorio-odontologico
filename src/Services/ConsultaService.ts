@@ -1,76 +1,83 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { pool } from "../lib/db";
 
-interface DadosAtualizacaoConsulta {
-    data?: string;
-    hora_inicio?: string;
-    hora_fim?: string;
-    paciente?: string;
-    medico?: string;
+export interface Consulta {
+    id: number;
+    data: string;
+    hora_inicio: string;
+    hora_fim: string;
+    paciente: string;
+    medico: string;
     observacoes?: string;
-    status: "success" | "error";
-    message: string;
-    dados: any;
+    status: string;
 }
 
-export async function criarConsulta(
-    data?: string,
-    hora_inicio?: string,
-    hora_fim?: string,
-    paciente?: string,
-    medico?: string,
-    observacoes?: string,
-): Promise<DadosAtualizacaoConsulta> {
+export type DadosAtualizacaoConsulta = Partial<Omit<Consulta, 'id'>>;
+
+export type ServiceResponse<T> = {
+    status: "success" | "error";
+    message: string;
+    data?: T | null;
+};
+
+export async function pegarConsultas(): Promise<ServiceResponse<Consulta[]>> {
     try {
-        const queryText = `
-            INSERT INTO consultas (data, hora_inicio, hora_fim, paciente, medico, observacoes)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING data, hora_inicio, hora_fim, paciente, medico, observacoes; -- Retorna dados seguros
-        `;
-
-    const result = await pool.query(queryText, [data, hora_inicio, hora_fim, paciente, medico, observacoes]);
-
-    console.log("Response database: ", result);
-
-    return {
-        status: "success",
-        message: "Consulta cadastrado com sucesso!",
-        dados: result.rows[0],
-    };
+        const queryText = "SELECT * FROM consultas ORDER BY data, hora_inicio ASC";
+        const result = await pool.query<Consulta>(queryText);
+        return {
+            status: "success",
+            message: "Consultas obtidas com sucesso.",
+            data: result.rows,
+        };
     } catch (error) {
         console.error("Erro ao pegar consultas:", error);
-        return {
-        status: "error",
-        message: "Erro interno ao tentar coletar as consultas.",
-        dados: null
-        };
+        return { status: "error", message: "Erro interno ao tentar coletar as consultas." };
     }
 }
 
-export async function atualizarConsulta(
-    id: string, 
-    dados: DadosAtualizacaoConsulta
-) {
+export type DadosCriacaoConsulta = Omit<Consulta, 'id' | 'status'>;
+
+export async function criarConsulta(dados: DadosCriacaoConsulta): Promise<ServiceResponse<Consulta>> {
     try {
-        const campos = Object.keys(dados);
-        const valores = Object.values(dados);
-
-        if (campos.length === 0) {
-            return { status: "error", message: "Nenhum dado fornecido para atualização." };
-        }
-
-        const setClause = campos
-            .map((campo, index) => `"${campo}" = $${index + 1}`)
-            .join(', ');
+        const { data, hora_inicio, hora_fim, paciente, medico, observacoes } = dados;
+        const statusInicial = "Agendado";
 
         const queryText = `
-            UPDATE consultas
-            SET ${setClause}
-            WHERE id = $${campos.length + 1}
+            INSERT INTO consultas (data, hora_inicio, hora_fim, paciente, medico, observacoes, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *;
         `;
 
-        const result = await pool.query(queryText, [...valores, id]);
+        const result = await pool.query<Consulta>(queryText, [data, hora_inicio, hora_fim, paciente, medico, observacoes, statusInicial]);
+
+        return {
+            status: "success",
+            message: "Consulta cadastrada com sucesso!",
+            data: result.rows[0],
+        };
+    } catch (error) {
+        console.error("Erro ao criar consulta:", error);
+        return { status: "error", message: "Erro interno ao criar a consulta.", data: null };
+    }
+}
+
+export async function atualizarConsulta(id: string, dados: DadosAtualizacaoConsulta): Promise<ServiceResponse<Consulta>> {
+    try {
+        const camposValidos = Object.keys(dados).filter(key => key in dados && dados[key as keyof typeof dados] !== undefined);
+        
+        if (camposValidos.length === 0) {
+            return { status: "error", message: "Nenhum dado fornecido para atualização." };
+        }
+
+        const valores = camposValidos.map(key => dados[key as keyof typeof dados]);
+        const setClause = camposValidos.map((campo, index) => `"${campo}" = $${index + 1}`).join(', ');
+
+        const queryText = `
+            UPDATE consultas SET ${setClause}
+            WHERE id = $${camposValidos.length + 1}
+            RETURNING *;
+        `;
+
+        const result = await pool.query<Consulta>(queryText, [...valores, id]);
 
         if (result.rows.length === 0) {
             return { status: "error", message: "Consulta não encontrada." };
@@ -79,9 +86,8 @@ export async function atualizarConsulta(
         return {
             status: "success",
             message: "Consulta atualizada com sucesso!",
-            data: result.rows[0]
+            data: result.rows[0],
         };
-
     } catch (error) {
         console.error("Erro ao atualizar consulta:", error);
         return { status: "error", message: "Erro interno ao atualizar consulta." };

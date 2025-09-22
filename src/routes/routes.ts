@@ -1,10 +1,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { criarConsulta } from "../Services/ConsultaService"
-import {
-  cadastrarUsuario,
-  pegarConsultas,
-  realizarLogin,
-} from "../Services/LoginService";
+import { criarConsulta, pegarConsultas, atualizarConsulta } from "../Services/ConsultaService";
+import type { DadosCriacaoConsulta, DadosAtualizacaoConsulta } from "../Services/ConsultaService";
+import { cadastrarUsuario, realizarLogin } from "../Services/LoginService";
 
 interface ICadastroBody {
   nome: string;
@@ -13,15 +10,6 @@ interface ICadastroBody {
   cpf: string;
   dataNascimento: string;
   senha: string;
-}
-
-interface DadosAtualizacaoConsulta {
-    data?: string;
-    hora_inicio?: string;
-    hora_fim?: string;
-    paciente?: string;
-    medico?: string;
-    observacoes?: string;
 }
 
 interface ILoginBody {
@@ -101,14 +89,11 @@ export default async function routes(app: FastifyInstance) {
 
   // Criar consultas
   app.post("/consultas", async (
-      request: FastifyRequest<{ Body: DadosAtualizacaoConsulta }>,
-      reply: FastifyReply
+        request: FastifyRequest<{ Body: DadosCriacaoConsulta}>,
+        reply: FastifyReply
     ) => {
     try {
-        const { data, hora_inicio, hora_fim, medico, paciente, observacoes } =
-          request.body;
-
-        const result = await criarConsulta(data, hora_inicio, hora_fim, paciente, medico, observacoes)
+        const result = await criarConsulta(request.body)
 
         if (result.status === "error") {
           return reply.status(400).send(result);
@@ -122,5 +107,25 @@ export default async function routes(app: FastifyInstance) {
     }
   });
 
+  app.patch("/consultas/:id", async (
+          request: FastifyRequest<{ Params: { id: string }, Body: DadosAtualizacaoConsulta }>,
+          reply: FastifyReply
+      ) => {
+          try {
+              const { id } = request.params;
+              const dados = request.body;
+              const result = await atualizarConsulta(id, dados);
 
+              if (result.status === 'error') {
+                  return result.message.includes("não encontrada") 
+                      ? reply.status(404).send(result) 
+                      : reply.status(400).send(result);
+              }
+              return reply.status(200).send(result);
+          } catch (error) {
+              console.error(`Erro no endpoint PATCH /consultas/${request.params.id}:`, error);
+              return reply.status(500).send({ status: "error", message: "Erro interno." });
+          }
+      }
+  );
 }

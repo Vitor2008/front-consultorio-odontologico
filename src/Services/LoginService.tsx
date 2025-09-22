@@ -81,30 +81,3 @@ export async function realizarLogin(
     return { status: "error", message: "Erro interno ao tentar fazer login." };
   }
 }
-
-type ServiceResponseArray = {
-  status: "success" | "error";
-  message: string;
-  data?: Date[] | null;
-};
-
-export async function pegarConsultas(): Promise<ServiceResponseArray> {
-  try {
-    const queryText = "SELECT * FROM consultas ORDER BY data, hora_inicio ASC";
-    const result = await pool.query(queryText);
-
-    const consultas = result.rows;
-
-    return {
-      status: "success",
-      message: "Consultas obtidas com sucesso.",
-      data: consultas,
-    };
-  } catch (error) {
-    console.error("Erro ao pegar consultas:", error);
-    return {
-      status: "error",
-      message: "Erro interno ao tentar coletar as consultas.",
-    };
-  }
-}
