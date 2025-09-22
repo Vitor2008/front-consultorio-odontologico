@@ -107,7 +107,7 @@ export default async function routes(app: FastifyInstance) {
     }
   });
 
-  app.patch("/consultas/:id", async (
+  app.post("/consultas/:id", async (
           request: FastifyRequest<{ Params: { id: string }, Body: DadosAtualizacaoConsulta }>,
           reply: FastifyReply
       ) => {
@@ -171,11 +171,11 @@ export default async function routes(app: FastifyInstance) {
   );
 
   app.get("/pacientes-all", async (_request: FastifyRequest, reply: FastifyReply) => {
-      const result = todosPacienteConsultas()
-      if ((await result).status === 'error') {
+      const result = await todosPacienteConsultas()
+      if (result.status === 'error') {
           return reply.status(404).send(result);
       }
 
-      return reply.status(200).send((await result).data);
+      return reply.status(200).send(result.data);
   })
 }

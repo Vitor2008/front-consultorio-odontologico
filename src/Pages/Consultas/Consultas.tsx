@@ -36,6 +36,28 @@ const columns: ColumnDef<Consulta>[] = [
 
 const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
 
+  var pacientes: Array<string> = [];
+  var dentistas: Array<string> = [];
+  try {
+    // const pacientes = ["Paciente Teste 1", "Paciente Teste 2", "Paciente Teste 3"];
+    // const dentistas = ["Dentista Teste 1", "Dentista Teste 2", "Dentista Teste 3"];
+    //pacientes = await axios.get(`http://localhost:8888/pacientes-all/`);
+    //dentistas = await axios.get(`http://localhost:8888/consultas/`);
+
+  } catch (error) {
+    console.error("Erro ao buscar pacientes ou dentistas:", error);
+    Swal.fire({
+      title: "Erro ao carregar dados!",
+      text: "Não foi possível carregar os dados necessários para o agendamento.",
+      icon: "error",
+      confirmButtonText: "Ok",
+      customClass: {
+        confirmButton: 'bg-color-secondary'
+      }
+    });
+    return;
+  }
+
   const modalContent = document.createElement("div");
   var titleModal = "";
 
@@ -115,13 +137,31 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
     },
     html: modalContent,
     didOpen: () => {
+      const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
+      const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
+
+      // Preencher pacientes
+      pacientes.forEach((nome) => {
+        const option = document.createElement("option");
+        option.value = nome;
+        option.textContent = nome;
+        campoPaciente.appendChild(option);
+      });
+
+      // Preencher dentistas
+      dentistas.forEach((nome) => {
+        const option = document.createElement("option");
+        option.value = nome;
+        option.textContent = nome;
+        campoDentista.appendChild(option);
+      });
+
       if (dadosConsulta.id !== undefined && Number(dadosConsulta.id) > 0) {
-        const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
-        const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
+
         const campoData = document.getElementById("campoData") as HTMLInputElement;
         const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
         const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
-        const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
+        //const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
         const campoObservacao = document.getElementById("campoObervacao") as HTMLTextAreaElement;
 
         if (campoPaciente) campoPaciente.value = dadosConsulta.paciente || "";
@@ -134,8 +174,6 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
       }
     },
     preConfirm: async () => {
-      const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
-      const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
       const campoData = document.getElementById("campoData") as HTMLInputElement;
       const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
       const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
@@ -189,15 +227,15 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         medico: "Médico Teste",
         data: campoData.value,
         hora_inicio: campoHoraInicio.value,
-        hora_fim: campoHoraFim.value
-        // status: campoStatus.value,
+        hora_fim: campoHoraFim.value,
+        status: "Cancelado",
       };
 
       var result;
 
       try {
         if (dadosConsulta.id !== undefined && Number(dadosConsulta.id) > 0) {
-          result = await axios.patch(`http://localhost:8888/consultas/${dadosConsulta.id}`, dados);
+          result = await axios.post(`http://localhost:8888/consultas/${dadosConsulta.id}`, dados);
         }
         else {
           result = await axios.post("http://localhost:8888/consultas", dados);
