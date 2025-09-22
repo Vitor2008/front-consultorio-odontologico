@@ -34,6 +34,26 @@ export async function pegarConsultas(): Promise<ServiceResponse<Consulta[]>> {
     }
 }
 
+export async function pegarConsultaPorId(id: string): Promise<ServiceResponse<Consulta>> {
+    try {
+        const queryText = "SELECT * FROM consultas WHERE id = $1";
+        const result = await pool.query<Consulta>(queryText, [id]);
+
+        if (result.rows.length === 0) {
+            return { status: "error", message: "Consulta não encontrada." };
+        }
+
+        return {
+            status: "success",
+            message: "Consulta encontrada com sucesso.",
+            data: result.rows[0],
+        };
+    } catch (error) {
+        console.error(`Erro ao buscar consulta com id ${id}:`, error);
+        return { status: "error", message: "Erro interno ao buscar a consulta." };
+    }
+}
+
 export type DadosCriacaoConsulta = Omit<Consulta, 'id' | 'status'>;
 
 export async function criarConsulta(dados: DadosCriacaoConsulta): Promise<ServiceResponse<Consulta>> {
@@ -91,5 +111,24 @@ export async function atualizarConsulta(id: string, dados: DadosAtualizacaoConsu
     } catch (error) {
         console.error("Erro ao atualizar consulta:", error);
         return { status: "error", message: "Erro interno ao atualizar consulta." };
+    }
+}
+
+export async function deletarConsulta(id: string): Promise<ServiceResponse<null>> {
+    try {
+        const queryText = "DELETE FROM consultas WHERE id = $1";
+        const result = await pool.query(queryText, [id]);
+
+        if (result.rowCount === 0) {
+            return { status: "error", message: "Consulta não encontrada para deleção." };
+        }
+
+        return {
+            status: "success",
+            message: "Consulta deletada com sucesso!",
+        };
+    } catch (error) {
+        console.error(`Erro ao deletar consulta com id ${id}:`, error);
+        return { status: "error", message: "Erro interno ao deletar a consulta." };
     }
 }

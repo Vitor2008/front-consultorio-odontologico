@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { criarConsulta, pegarConsultas, atualizarConsulta } from "../Services/ConsultaService";
+import { criarConsulta, pegarConsultas, atualizarConsulta, pegarConsultaPorId, deletarConsulta } from "../Services/ConsultaService";
 import type { DadosCriacaoConsulta, DadosAtualizacaoConsulta } from "../Services/ConsultaService";
 import { cadastrarUsuario, realizarLogin } from "../Services/LoginService";
 
@@ -124,6 +124,47 @@ export default async function routes(app: FastifyInstance) {
               return reply.status(200).send(result);
           } catch (error) {
               console.error(`Erro no endpoint PATCH /consultas/${request.params.id}:`, error);
+              return reply.status(500).send({ status: "error", message: "Erro interno." });
+          }
+      }
+  );
+
+  app.get("/consultas/:id", async (
+          request: FastifyRequest<{ Params: { id: string } }>,
+          reply: FastifyReply
+      ) => {
+          try {
+              const { id } = request.params;
+              const result = await pegarConsultaPorId(id);
+
+              if (result.status === 'error') {
+                  // Se não encontrou, o status correto é 404 Not Found
+                  return reply.status(404).send(result);
+              }
+
+              return reply.status(200).send(result);
+          } catch (error) {
+              console.error("Erro no endpoint GET /consultas/:id:", error);
+              return reply.status(500).send({ status: "error", message: "Erro interno." });
+          }
+      }
+  );
+
+  app.delete("/consultas/:id",async (
+          request: FastifyRequest<{ Params: { id:string } }>,
+          reply: FastifyReply
+      ) => {
+          try {
+              const { id } = request.params;
+              const result = await deletarConsulta(id);
+
+              if (result.status === 'error') {
+                  return reply.status(404).send(result);
+              }
+
+              return reply.status(200).send(result);
+          } catch (error) {
+              console.error("Erro no endpoint DELETE /consultas/:id:", error);
               return reply.status(500).send({ status: "error", message: "Erro interno." });
           }
       }
