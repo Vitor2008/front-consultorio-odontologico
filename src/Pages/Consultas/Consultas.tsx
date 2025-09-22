@@ -4,13 +4,14 @@ import { faPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
 import Button from "../../Components/Button/Button";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
-import Modal from "react-modal";
+import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { isAfter, isBefore, parseISO } from "date-fns";
 import axios from "axios";
+import { formatarData } from "../../Helper/FormatarData";
 
 interface Consulta {
-  id: string;
+  id: number;
   data: string;
   hora_inicio: string;
   hora_fim: string;
@@ -32,9 +33,172 @@ const columns: ColumnDef<Consulta>[] = [
   { accessorKey: "acoes", header: "Ações" },
 ];
 
+const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
+
+  const modalContent = document.createElement("div");
+  var titleModal = "";
+
+  if (dadosConsulta.id > 0) {
+    titleModal = "Editar consulta";
+  } else {
+    titleModal = "Nova consulta";
+  };
+  modalContent.innerHTML = `
+  <div class="modal grid grid-cols-1 gap-4 text-left">
+      <!-- Nome do Paciente -->
+      <div>
+        <label for="campoPaciente" class="block font-medium text-gray-700">Paciente:*</label>
+        <select id="campoPaciente" class="border rounded-md p-2 w-full">
+          <option value="">Selecione o paciente</option>
+        </select>
+        <p id="erroPaciente" class="text-error text-sm hidden">Campo obrigatório!</p>
+      </div>
+
+      <!-- Nome do Dentista -->
+      <div>
+        <label for="campoDentista" class="block font-medium text-gray-700">Dentista:*</label>
+        <select id="campoDentista" class="border rounded-md p-2 w-full">
+          <option value="">Selecione o dentista</option>
+        </select>
+        <p id="erroDentista" class="text-error text-sm hidden">Campo obrigatório!</p>
+      </div>
+
+      <!-- Data da Consulta -->
+      <div>
+        <label for="campoData" class="block font-medium text-gray-700">Data da consulta:*</label>
+        <input type="date" id="campoData" class="border rounded-md p-2 w-full cursor-pointer" />
+        <p id="erroData" class="text-error text-sm hidden">Campo obrigatório!</p>
+      </div>
+
+      <!-- Hora Início e Hora Fim -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="campoHoraInicio" class="block font-medium text-gray-700">Hora início:*</label>
+          <input type="time" id="campoHoraInicio" class="border rounded-md p-2 w-full cursor-pointer" />
+          <p id="erroHoraInicio" class="text-error text-sm hidden">Campo obrigatório!</p>
+        </div>
+        <div>
+          <label for="campoHoraFim" class="block font-medium text-gray-700">Hora fim:*</label>
+          <input type="time" id="campoHoraFim" class="border rounded-md p-2 w-full cursor-pointer" />
+          <p id="erroHoraFim" class="text-error text-sm hidden">Campo obrigatório!</p>
+        </div>
+      </div>
+
+      <div>
+        <label for="campoObervacao" class="block font-medium text-gray-700">Observação:</label>
+        <textarea id="campoObervacao" class="swal2-textarea border rounded-md p-1 m-0 w-full"></textarea>
+      </div>
+
+      <!-- Status da Consulta -->
+      <div>
+        <label for="campoStatus" class="block font-medium text-gray-700">Status:*</label>
+        <select id="campoStatus" class="border rounded-md p-2 w-full">
+          <option value="">Selecione o status</option>
+          <option value="agendada">Agendada</option>
+          <option value="realizada">Realizada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+        <p id="erroStatus" class="text-error text-sm hidden">Campo obrigatório!</p>
+      </div>
+    </div>
+    `;
+
+  Swal.fire({
+    title: titleModal,
+    showCancelButton: true,
+    confirmButtonText: "Agendar",
+    cancelButtonText: "Cancelar",
+    customClass: {
+      confirmButton: 'bg-color-primary',
+      cancelButton: 'bg-color-secondary'
+    },
+    html: modalContent,
+    didOpen: () => {
+      if (dadosConsulta.id > 0) {
+        const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
+        const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
+        const campoData = document.getElementById("campoData") as HTMLInputElement;
+        const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
+        const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
+        // const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
+        const campoObservacao = document.getElementById("campoObervacao") as HTMLTextAreaElement;
+
+        if (campoPaciente) campoPaciente.value = dadosConsulta.paciente || "";
+        if (campoDentista) campoDentista.value = dadosConsulta.medico || "";
+        if (campoData) campoData.value = formatarData(dadosConsulta.data) || "";
+        if (campoHoraInicio) campoHoraInicio.value = dadosConsulta.hora_inicio?.slice(0, 5) || "";
+        if (campoHoraFim) campoHoraFim.value = dadosConsulta.hora_fim?.slice(0, 5) || "";
+        // if (campoStatus) campoStatus.value = dadosConsulta.status?.toLowerCase() || "";
+        if (campoObservacao) campoObservacao.value = dadosConsulta.observacoes || "";
+      }
+    },
+    preConfirm: async () => {
+      const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
+      const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
+      const campoData = document.getElementById("campoData") as HTMLInputElement;
+      const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
+      const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
+      const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
+
+      let valid = true;
+
+      // if (campoPaciente && !campoPaciente.value) {
+      //   document.getElementById("erroPaciente")?.classList.remove("hidden");
+      //   valid = false;
+      // } else {
+      //   document.getElementById("erroPaciente")?.classList.add("hidden");
+      // }
+      // if (campoDentista && !campoDentista.value) {
+      //   document.getElementById("erroDentista")?.classList.remove("hidden");
+      //   valid = false;
+      // }
+      // else {
+      //   document.getElementById("erroDentista")?.classList.add("hidden");
+      // }
+      if (campoData && !campoData.value) {
+        document.getElementById("erroData")?.classList.remove("hidden");
+        valid = false;
+      }
+      else {
+        document.getElementById("erroData")?.classList.add("hidden");
+      }
+      if (campoHoraInicio && !campoHoraInicio.value) {
+        document.getElementById("erroHoraInicio")?.classList.remove("hidden");
+        valid = false;
+      }
+      else {
+        document.getElementById("erroHoraInicio")?.classList.add("hidden");
+      }
+      if (campoHoraFim && !campoHoraFim.value) {
+        document.getElementById("erroHoraFim")?.classList.remove("hidden");
+        valid = false;
+      }
+      else {
+        document.getElementById("erroHoraFim")?.classList.add("hidden");
+      }
+      if (campoStatus && !campoStatus.value) {
+        document.getElementById("erroStatus")?.classList.remove("hidden");
+        valid = false;
+      }
+
+      const dados = {
+        paciente: "Paciente Teste",
+        medico: "Médico Teste",
+        data: campoData.value,
+        hora_inicio: campoHoraInicio.value,
+        hora_fim: campoHoraFim.value
+        // status: campoStatus.value,
+      };
+
+      const response = await axios.post("http://localhost:8888/consultas", { dados });
+
+      console.log(response);
+
+    }
+  });
+};
+
 const Consultas = () => {
-  const [modalDetalhes, setModalDetalhes] = useState<Consulta | null>(null);
-  const [modalNovo, setModalNovo] = useState(false);
 
   const [dataInicioInput, setDataInicioInput] = useState("");
   const [dataFimInput, setDataFimInput] = useState("");
@@ -106,7 +270,7 @@ const Consultas = () => {
             text="Novo Agendamento"
             icon={faPlus}
             color="bg-color-primary"
-            onClick={() => setModalNovo(true)}
+            onClick={abrirModal}
           />
         </div>
       </div>
@@ -165,8 +329,8 @@ const Consultas = () => {
                     {header.isPlaceholder
                       ? null
                       : typeof header.column.columnDef.header === "function"
-                      ? header.column.columnDef.header(header.getContext())
-                      : header.column.columnDef.header}
+                        ? header.column.columnDef.header(header.getContext())
+                        : header.column.columnDef.header}
                   </th>
                 ))}
               </tr>
@@ -177,7 +341,7 @@ const Consultas = () => {
               <tr
                 key={row.id}
                 className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => setModalDetalhes(row.original)}
+                onClick={() => abrirModal(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2 text-sm text-gray-800">
@@ -189,98 +353,6 @@ const Consultas = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Modal de Detalhes */}
-      <Modal
-        isOpen={!!modalDetalhes}
-        onRequestClose={() => setModalDetalhes(null)}
-        className="modal"
-        overlayClassName="overlay"
-      >
-        {modalDetalhes && (
-          <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Detalhes da Consulta</h2>
-            <p>
-              <strong>Data:</strong>{" "}
-              {format(new Date(modalDetalhes.data), "dd/MM/yyyy")}
-            </p>
-            <p>
-              <strong>Horário:</strong> {modalDetalhes.hora_inicio} -{" "}
-              {modalDetalhes.hora_fim}
-            </p>
-            <p>
-              <strong>Paciente:</strong> {modalDetalhes.paciente}
-            </p>
-            <p>
-              <strong>Médico:</strong> {modalDetalhes.medico}
-            </p>
-            <p>
-              <strong>Observações:</strong> {modalDetalhes.observacoes || "—"}
-            </p>
-            <button
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => setModalDetalhes(null)}
-            >
-              Fechar
-            </button>
-          </div>
-        )}
-      </Modal>
-
-      {/* Modal de Novo Agendamento */}
-      <Modal
-        isOpen={modalNovo}
-        onRequestClose={() => setModalNovo(false)}
-        className="modal"
-        overlayClassName="overlay"
-      >
-        <div className="p-4">
-          <h2 className="text-xl font-semibold mb-4">Novo Agendamento</h2>
-          {/* Aqui você pode integrar com React Hook Form */}
-          <form className="space-y-4">
-            <input type="date" className="w-full border px-3 py-2 rounded" />
-            <input
-              type="time"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Hora Início"
-            />
-            <input
-              type="time"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Hora Fim"
-            />
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Paciente"
-            />
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Médico"
-            />
-            <textarea
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Observações"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="bg-gray-300 px-4 py-2 rounded"
-                onClick={() => setModalNovo(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Salvar
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
     </div>
   );
 };
