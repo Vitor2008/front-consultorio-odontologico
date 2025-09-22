@@ -354,27 +354,27 @@ const Consultas = () => {
           type="date"
           value={dataInicioInput}
           onChange={(e) => setDataInicioInput(e.target.value)}
-          className="border px-3 py-2 rounded input-filtro"
+          className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <input
           type="date"
           value={dataFimInput}
           onChange={(e) => setDataFimInput(e.target.value)}
-          className="border px-3 py-2 rounded input-filtro"
+          className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <input
           type="text"
           value={pacienteInput}
           onChange={(e) => setPacienteInput(e.target.value)}
           placeholder="Paciente"
-          className="border px-3 py-2 rounded input-filtro"
+          className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <input
           type="text"
           value={medicoInput}
           onChange={(e) => setMedicoInput(e.target.value)}
           placeholder="Médico"
-          className="border px-3 py-2 rounded input-filtro"
+          className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <Button
           text="Pesquisar"
@@ -391,7 +391,7 @@ const Consultas = () => {
 
       {/* Tabela */}
       <div className="max-w-7xl mx-auto mt-6 overflow-x-auto md:overflow-x-visible">
-        <table className="min-w-full table-auto border border-gray-200">
+        <table className="min-w-full table-auto border border-gray-200 bg-white">
           <thead className="bg-gray-100 bg-color-primary text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>

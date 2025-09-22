@@ -197,7 +197,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       </label>
       <button className="submit">Criar conta</button>
       <p className="signin">
-        Já tem uma conta?
+        Já tem uma conta?{" "}
         <a href="#" onClick={onTrocarTipo}>
           Entrar
         </a>

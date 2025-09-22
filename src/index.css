@@ -55,6 +55,10 @@ a {
   display: none;
 }
 
+body{
+  background-color: #e8e8e8;
+}
+
 @media (max-width: 1024px) {
   .container {
     padding-left: 5%;
