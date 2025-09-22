@@ -29,6 +29,8 @@ export async function cadastrarUsuario(
 
     const result = await pool.query(queryText, values);
 
+    console.log("Response database: ", result);
+
     return {
       status: "success",
       message: "Usuário cadastrado com sucesso!",
@@ -36,6 +38,9 @@ export async function cadastrarUsuario(
     };
   } catch (error) {
     console.error("Erro ao cadastrar usuário:", error);
+    if (typeof error === "object" && error !== null && "code" in error) {
+      console.error("Erro:", error.code);
+    }
     // Erro de violação de chave única (ex: email ou CPF já existe)
     if (error instanceof Error && "code" in error && error.code === "23505") {
       return { status: "error", message: "E-mail ou CPF já está em uso." };
@@ -74,5 +79,32 @@ export async function realizarLogin(
   } catch (error) {
     console.error("Erro ao realizar login:", error);
     return { status: "error", message: "Erro interno ao tentar fazer login." };
+  }
+}
+
+type ServiceResponseArray = {
+  status: "success" | "error";
+  message: string;
+  data?: Date[] | null;
+};
+
+export async function pegarConsultas(): Promise<ServiceResponseArray> {
+  try {
+    const queryText = "SELECT * FROM consultas ORDER BY data, hora_inicio ASC";
+    const result = await pool.query(queryText);
+
+    const consultas = result.rows;
+
+    return {
+      status: "success",
+      message: "Consultas obtidas com sucesso.",
+      data: consultas,
+    };
+  } catch (error) {
+    console.error("Erro ao pegar consultas:", error);
+    return {
+      status: "error",
+      message: "Erro interno ao tentar coletar as consultas.",
+    };
   }
 }

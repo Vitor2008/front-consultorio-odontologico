@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FormLogin.css";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 interface FormLoginProps {
   tipo: "login" | "register";
@@ -16,6 +17,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
   const [dataNascimento, setDataNascimento] = useState("");
   const [senha, setSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const { login } = useAuth();
 
   const navigate = useNavigate();
 
@@ -30,6 +32,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       });
 
       const resposta = response.data;
+      login(resposta.data);
 
       setMensagem(resposta.message);
       localStorage.setItem("usuario", JSON.stringify(resposta.data));
@@ -65,6 +68,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       setMensagem(resposta.message + " Agora você pode fazer o login!");
       onTrocarTipo();
     } catch (error) {
+      console.log("Erro do back: ", error);
       if (axios.isAxiosError(error) && error.response) {
         setMensagem(error.response.data.message || "Erro ao cadastrar.");
       } else {
@@ -193,11 +197,12 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       </label>
       <button className="submit">Criar conta</button>
       <p className="signin">
-        Já tem uma conta?{" "}
+        Já tem uma conta?
         <a href="#" onClick={onTrocarTipo}>
           Entrar
-        </a>{" "}
+        </a>
       </p>
+      {mensagem && <p className="error-message">{mensagem}</p>}
     </form>
   );
 };

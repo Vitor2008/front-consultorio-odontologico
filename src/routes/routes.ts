@@ -1,5 +1,9 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { cadastrarUsuario, realizarLogin } from "../Services/LoginService";
+import {
+  cadastrarUsuario,
+  pegarConsultas,
+  realizarLogin,
+} from "../Services/LoginService";
 
 interface ICadastroBody {
   nome: string;
@@ -72,4 +76,18 @@ export default async function routes(app: FastifyInstance) {
       }
     }
   );
+
+  // Pegas todas as consultas
+  app.get("/consultas", async (_request, reply) => {
+    try {
+      const result = await pegarConsultas();
+
+      return reply.status(200).send(result);
+    } catch (error) {
+      console.error("Erro no endpoint /consultas:", error);
+      return reply
+        .status(500)
+        .send({ status: "error", message: "Erro interno." });
+    }
+  });
 }
