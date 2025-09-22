@@ -190,7 +190,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         // status: campoStatus.value,
       };
 
-      const response = await axios.post("http://localhost:8888/consultas", { dados });
+      const response = await axios.post("http://localhost:8888/consultas", dados);
 
       console.log(response);
 

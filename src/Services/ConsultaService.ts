@@ -59,15 +59,14 @@ export type DadosCriacaoConsulta = Omit<Consulta, 'id' | 'status'>;
 export async function criarConsulta(dados: DadosCriacaoConsulta): Promise<ServiceResponse<Consulta>> {
     try {
         const { data, hora_inicio, hora_fim, paciente, medico, observacoes } = dados;
-        const statusInicial = "Agendado";
 
         const queryText = `
-            INSERT INTO consultas (data, hora_inicio, hora_fim, paciente, medico, observacoes, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO consultas (data, hora_inicio, hora_fim, paciente, medico, observacoes)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
 
-        const result = await pool.query<Consulta>(queryText, [data, hora_inicio, hora_fim, paciente, medico, observacoes, statusInicial]);
+        const result = await pool.query<Consulta>(queryText, [data, hora_inicio, hora_fim, paciente, medico, observacoes]);
 
         return {
             status: "success",

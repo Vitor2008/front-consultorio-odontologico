@@ -1,0 +1,33 @@
+# Ficheiro: Dockerfile.frontend (VERSÃO CORRIGIDA)
+
+# --- Etapa 1: Build do Frontend ---
+FROM node:20-alpine AS build
+WORKDIR /app
+
+# Copia apenas os arquivos de dependência primeiro para aproveitar o cache do Docker
+COPY package*.json ./
+RUN npm install
+
+# Copia o resto do código fonte
+COPY . .
+
+# 👇 ADIÇÃO 1: Copie o nginx.conf para dentro desta etapa também
+COPY nginx.conf .
+
+# O script 'build' do seu package.json já deve rodar 'vite build'
+RUN npm run build
+
+# --- Etapa 2: Servidor Web (Nginx) ---
+FROM nginx:1.25-alpine
+
+# Remove o conteúdo padrão do Nginx
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copia os arquivos estáticos gerados na etapa de build
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# 👇 CORREÇÃO 2: Copie o nginx.conf A PARTIR da etapa 'build' anterior
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

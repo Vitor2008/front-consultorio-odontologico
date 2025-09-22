@@ -1,0 +1,21 @@
+# Ficheiro: Dockerfile.backend
+
+# Usa a mesma base Node para consistência
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Assume que você tem um tsconfig.json que compila para a pasta 'dist'
+# E um script no package.json: "build:backend": "tsc --project tsconfig.server.json" (ou similar)
+# Se seu script de build principal já compila o backend, pode usar 'npm run build'
+RUN npm run build
+
+# Expõe a porta que o seu servidor Fastify usa
+EXPOSE 8888
+
+# Comando para iniciar o servidor backend compilado
+CMD ["node", "dist/server.js"]
