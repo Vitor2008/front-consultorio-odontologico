@@ -5,10 +5,12 @@ import Button from "../../Components/Button/Button";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import Swal from "sweetalert2";
-import { format } from "date-fns";
-import { isAfter, isBefore, parseISO } from "date-fns";
+import type { SweetAlertResult } from "sweetalert2"
+import { isAfter, isBefore, format, parseISO } from "date-fns";
 import axios from "axios";
 import { formatarData } from "../../Helper/FormatarData";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHospitalUser } from '@fortawesome/free-solid-svg-icons'
 
 interface Consulta {
   id: number;
@@ -24,13 +26,12 @@ const columns: ColumnDef<Consulta>[] = [
   {
     accessorKey: "data",
     header: "Data",
-    cell: (info) => format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
+    cell: (info) => format(parseISO(info.getValue() as string), "dd/MM/yyyy")
   },
   { accessorKey: "hora_inicio", header: "Início" },
   { accessorKey: "hora_fim", header: "Término" },
   { accessorKey: "paciente", header: "Paciente" },
   { accessorKey: "medico", header: "Médico" },
-  { accessorKey: "acoes", header: "Ações" },
 ];
 
 const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
@@ -38,7 +39,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
   const modalContent = document.createElement("div");
   var titleModal = "";
 
-  if (dadosConsulta.id > 0) {
+  if (dadosConsulta.id !== undefined && Number(dadosConsulta.id) > 0) {
     titleModal = "Editar consulta";
   } else {
     titleModal = "Nova consulta";
@@ -86,7 +87,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
 
       <div>
         <label for="campoObervacao" class="block font-medium text-gray-700">Observação:</label>
-        <textarea id="campoObervacao" class="swal2-textarea border rounded-md p-1 m-0 w-full"></textarea>
+        <textarea id="campoObervacao" class="h-32 border rounded-md p-1 m-0 w-full"></textarea>
       </div>
 
       <!-- Status da Consulta -->
@@ -114,13 +115,13 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
     },
     html: modalContent,
     didOpen: () => {
-      if (dadosConsulta.id > 0) {
+      if (dadosConsulta.id !== undefined && Number(dadosConsulta.id) > 0) {
         const campoPaciente = document.getElementById("campoPaciente") as HTMLSelectElement;
         const campoDentista = document.getElementById("campoDentista") as HTMLSelectElement;
         const campoData = document.getElementById("campoData") as HTMLInputElement;
         const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
         const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
-        // const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
+        const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
         const campoObservacao = document.getElementById("campoObervacao") as HTMLTextAreaElement;
 
         if (campoPaciente) campoPaciente.value = dadosConsulta.paciente || "";
@@ -128,7 +129,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         if (campoData) campoData.value = formatarData(dadosConsulta.data) || "";
         if (campoHoraInicio) campoHoraInicio.value = dadosConsulta.hora_inicio?.slice(0, 5) || "";
         if (campoHoraFim) campoHoraFim.value = dadosConsulta.hora_fim?.slice(0, 5) || "";
-        // if (campoStatus) campoStatus.value = dadosConsulta.status?.toLowerCase() || "";
+        //if (campoStatus) campoStatus.value = dadosConsulta.status?.toLowerCase() || "";
         if (campoObservacao) campoObservacao.value = dadosConsulta.observacoes || "";
       }
     },
@@ -181,6 +182,8 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         valid = false;
       }
 
+      if (!valid) return false;
+
       const dados = {
         paciente: "Paciente Teste",
         medico: "Médico Teste",
@@ -190,10 +193,52 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         // status: campoStatus.value,
       };
 
-      const response = await axios.post("http://localhost:8888/consultas", dados);
+      var result;
 
-      console.log(response);
+      try {
+        if (dadosConsulta.id !== undefined && Number(dadosConsulta.id) > 0) {
+          result = await axios.patch(`http://localhost:8888/consultas/${dadosConsulta.id}`, dados);
+        }
+        else {
+          result = await axios.post("http://localhost:8888/consultas", dados);
+        }
 
+        if (!result || result.data.status === "error") {
+          Swal.fire({
+            title: "Erro ao agendar consulta!",
+            text: result?.data.message,
+            icon: "error",
+            confirmButtonText: "Ok",
+            customClass: {
+              confirmButton: 'bg-color-secondary'
+            }
+          });
+          return false;
+        }
+        return true;
+
+      } catch (error) {
+        Swal.fire({
+          title: "Falha ao agendar consulta!",
+          text: "Ocorreu um erro ao agendar a consulta.",
+          icon: "error",
+          confirmButtonText: "Ok",
+          customClass: {
+            confirmButton: 'bg-color-secondary'
+          }
+        });
+        return false;
+      }
+    }
+  }).then((result: SweetAlertResult) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Consulta agendada!",
+        icon: "success",
+        customClass: {
+          confirmButton: 'bg-color-primary'
+        }
+      });
     }
   });
 };
@@ -243,17 +288,6 @@ const Consultas = () => {
     });
   }, [consultas, dataInicio, dataFim, filtroPaciente, filtroMedico]);
 
-  //   const hoje = new Date();
-  //   const consultasHoje = mockConsultas.filter(consulta =>
-  //     isSameDay(parseISO(consulta.data), hoje)
-  //   )
-
-  //   const table = useReactTable({
-  //     data: consultasHoje,
-  //     columns,
-  //     getCoreRowModel: getCoreRowModel()
-  //   })
-
   const table = useReactTable({
     data: consultasFiltradas,
     columns,
@@ -262,10 +296,11 @@ const Consultas = () => {
 
   return (
     <div className="consultas-page">
+
       {/* Cabeçalho */}
       <div className="sticky top-0 z-10 bg-white px-4 py-4 shadow">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-dental-blue">Consultas</h1>
+          <h1 className="text-2xl font-semibold color-primary"><FontAwesomeIcon icon={faHospitalUser} /> Consultas</h1>
           <Button
             text="Novo Agendamento"
             icon={faPlus}
@@ -275,32 +310,32 @@ const Consultas = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="filtros max-w-7xl mx-auto mt-6 gap-4">
         <input
           type="date"
           value={dataInicioInput}
           onChange={(e) => setDataInicioInput(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="border px-3 py-2 rounded input-filtro"
         />
         <input
           type="date"
           value={dataFimInput}
           onChange={(e) => setDataFimInput(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="border px-3 py-2 rounded input-filtro"
         />
         <input
           type="text"
           value={pacienteInput}
           onChange={(e) => setPacienteInput(e.target.value)}
           placeholder="Paciente"
-          className="border px-3 py-2 rounded"
+          className="border px-3 py-2 rounded input-filtro"
         />
         <input
           type="text"
           value={medicoInput}
           onChange={(e) => setMedicoInput(e.target.value)}
           placeholder="Médico"
-          className="border px-3 py-2 rounded"
+          className="border px-3 py-2 rounded input-filtro"
         />
         <Button
           text="Pesquisar"
@@ -316,9 +351,9 @@ const Consultas = () => {
       </div>
 
       {/* Tabela */}
-      <div className="max-w-7xl mx-auto mt-6 overflow-x-auto">
+      <div className="max-w-7xl mx-auto mt-6 overflow-x-auto md:overflow-x-visible">
         <table className="min-w-full table-auto border border-gray-200">
-          <thead className="bg-gray-100 bg-color-secondary text-white">
+          <thead className="bg-gray-100 bg-color-primary text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -340,7 +375,7 @@ const Consultas = () => {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="hover:bg-gray-50 cursor-pointer"
+                className="cursor-pointer"
                 onClick={() => abrirModal(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (

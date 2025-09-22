@@ -1,0 +1,37 @@
+.input-filtro {
+  width: 210px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.filtros button {
+  width: 120px;
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.modal {
+  font-size: 15px;
+}
+
+tr:hover {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+@media (max-width: 1346px) {
+  .filtros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .filtros {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
