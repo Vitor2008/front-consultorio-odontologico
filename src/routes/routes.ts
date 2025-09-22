@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { criarConsulta, pegarConsultas, atualizarConsulta, pegarConsultaPorId, deletarConsulta } from "../Services/ConsultaService";
+import { criarConsulta, pegarConsultas, atualizarConsulta, pegarConsultaPorId, deletarConsulta, todosPacienteConsultas } from "../Services/ConsultaService";
 import type { DadosCriacaoConsulta, DadosAtualizacaoConsulta } from "../Services/ConsultaService";
 import { cadastrarUsuario, realizarLogin } from "../Services/LoginService";
 
@@ -169,4 +169,13 @@ export default async function routes(app: FastifyInstance) {
           }
       }
   );
+
+  app.get("/pacientes-all", async (_request: FastifyRequest, reply: FastifyReply) => {
+      const result = todosPacienteConsultas()
+      if ((await result).status === 'error') {
+          return reply.status(404).send(result);
+      }
+
+      return reply.status(200).send((await result).data);
+  })
 }

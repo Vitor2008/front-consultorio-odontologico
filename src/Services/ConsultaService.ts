@@ -34,6 +34,26 @@ export async function pegarConsultas(): Promise<ServiceResponse<Consulta[]>> {
     }
 }
 
+export async function todosPacienteConsultas() {
+    try {
+        const queryText = "SELECT paciente FROM consultas";
+        const result = await pool.query<Consulta>(queryText);
+
+        if (result.rows.length === 0) {
+            return { status: "error", message: "Consulta não encontrada." };
+        }
+
+        return {
+            status: "success",
+            message: "Consulta encontrada com sucesso.",
+            data: result.rows,
+        };
+    } catch (error) {
+        console.error(`Erro ao buscar todos os pacientes:`, error);
+        return { status: "error", message: "Erro interno ao buscar a consulta." };
+    }
+}
+
 export async function pegarConsultaPorId(id: string): Promise<ServiceResponse<Consulta>> {
     try {
         const queryText = "SELECT * FROM consultas WHERE id = $1";
