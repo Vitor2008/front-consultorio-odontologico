@@ -20,6 +20,7 @@ interface Consulta {
   paciente: string;
   medico: string;
   observacoes?: string;
+  status: string;
 }
 
 const columns: ColumnDef<Consulta>[] = [
@@ -161,7 +162,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         const campoData = document.getElementById("campoData") as HTMLInputElement;
         const campoHoraInicio = document.getElementById("campoHoraInicio") as HTMLInputElement;
         const campoHoraFim = document.getElementById("campoHoraFim") as HTMLInputElement;
-        //const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
+        const campoStatus = document.getElementById("campoStatus") as HTMLSelectElement;
         const campoObservacao = document.getElementById("campoObervacao") as HTMLTextAreaElement;
 
         if (campoPaciente) campoPaciente.value = dadosConsulta.paciente || "";
@@ -169,7 +170,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         if (campoData) campoData.value = formatarData(dadosConsulta.data) || "";
         if (campoHoraInicio) campoHoraInicio.value = dadosConsulta.hora_inicio?.slice(0, 5) || "";
         if (campoHoraFim) campoHoraFim.value = dadosConsulta.hora_fim?.slice(0, 5) || "";
-        //if (campoStatus) campoStatus.value = dadosConsulta.status?.toLowerCase() || "";
+        if (campoStatus) campoStatus.value = dadosConsulta.status?.toLowerCase() || "";
         if (campoObservacao) campoObservacao.value = dadosConsulta.observacoes || "";
       }
     },
@@ -228,7 +229,7 @@ const abrirModal = (dadosConsulta: Partial<Consulta> = {}) => {
         data: campoData.value,
         hora_inicio: campoHoraInicio.value,
         hora_fim: campoHoraFim.value,
-        status: "Cancelado",
+        status: campoStatus.value,
       };
 
       var result;
