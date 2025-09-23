@@ -1,13 +1,13 @@
-import { Routes, Route } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
-import Layout from './Pages/Layout/Layout'
-import Consultas from './Pages/Consultas/Consultas'
-import Pacientes from './Pages/Pacientes/Pacientes'
-import Medicos from './Pages/Medicos/Medicos'
-import Financeiro from './Pages/Financeiro/Financeiro'
-import Configuracoes from './Pages/Configuracoes/Configuracoes'
+import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import Layout from "./Pages/Layout/Layout";
+import Consultas from "./Pages/Consultas/Consultas";
+import Pacientes from "./Pages/Pacientes/Pacientes";
+import Medicos from "./Pages/Dentistas/Dentistas";
+import Financeiro from "./Pages/Financeiro/Financeiro";
+import Configuracoes from "./Pages/Configuracoes/Configuracoes";
 
-const Login = lazy(() => import('./Pages/Login/Login'))
+const Login = lazy(() => import("./Pages/Login/Login"));
 
 function App() {
   return (
@@ -56,7 +56,7 @@ function App() {
         />
       </Routes>
     </Suspense>
-  )
+  );
 }
 
-export default App
+export default App;
