@@ -2,6 +2,7 @@ import "./Pacientes.css";
 import type { Cliente } from "../../models/Cliente";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Loader from "../../Components/Loader/Loader";
 
 const Pacientes = () => {
   const [paciente, setPaciente] = useState<Cliente[]>([]);
@@ -26,7 +27,7 @@ const Pacientes = () => {
   }, []);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <Loader />;
   }
 
   if (error) {
