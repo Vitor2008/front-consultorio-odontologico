@@ -27,10 +27,18 @@
     margin-left: 0;
   }
 
+  .layout-main {
+    padding: 10px;
+  }
+
   .layout-header {
     justify-content: space-between;
     padding: 20px;
     width: 100%;
-    margin-top: 10px;
+  }
+
+  .layout-header .button {
+    padding-block: 0.5rem;
+    padding-inline: 0.5rem;
   }
 }

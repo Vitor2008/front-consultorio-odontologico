@@ -1,5 +1,6 @@
 import "./Consultas.css";
 import React, { useState, useMemo, useEffect } from "react";
+import Loader from "../../Components/Loader/Loader";
 import {
   faPlus,
   faSearch,
@@ -45,6 +46,8 @@ interface Agendamento {
 }
 
 const Consultas: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  
   // 2. Estados para armazenar todos os dados que a página precisa
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -83,6 +86,8 @@ const Consultas: React.FC = () => {
           "Não foi possível carregar os dados da página.",
           "error"
         );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -122,30 +127,31 @@ const Consultas: React.FC = () => {
   }, [agendamentos, clientes, dentistas, filtros]);
 
   // 4. Colunas da tabela atualizadas para usar os dados corretos
-  const columns = useMemo<ColumnDef<Agendamento>[]>(
-    () => [
-      {
-        accessorKey: "data_hora_inicio",
-        header: "Data",
-        cell: (info) =>
-          format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
-      },
-      {
-        accessorKey: "data_hora_inicio",
-        header: "Início",
-        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
-      },
-      {
-        accessorKey: "data_hora_fim",
-        header: "Término",
-        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
-      },
-      { accessorKey: "nome_cliente", header: "Paciente" },
-      { accessorKey: "nome_dentista", header: "Dentista" },
-      { accessorKey: "status_agendamento", header: "Status" },
-    ],
-    []
-  );
+  const columns = useMemo<ColumnDef<Agendamento>[]>(() => [
+    {
+      accessorKey: "data_hora_inicio",
+      header: "Data",
+      cell: (info) =>
+        format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
+    },
+    {
+      accessorFn: (row) => row.data_hora_inicio,
+      id: "hora_inicio", // ID único para evitar conflito
+      header: "Início",
+      cell: (info) =>
+        format(parseISO(info.getValue() as string), "HH:mm"),
+    },
+    {
+      accessorKey: "data_hora_fim",
+      header: "Término",
+      cell: (info) =>
+        format(parseISO(info.getValue() as string), "HH:mm"),
+    },
+    { accessorKey: "nome_cliente", header: "Paciente" },
+    { accessorKey: "nome_dentista", header: "Dentista" },
+    { accessorKey: "status_agendamento", header: "Status" },
+  ], []);
+
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -295,7 +301,7 @@ const Consultas: React.FC = () => {
         try {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
-            // await axios.put(`http://localhost:8888/agendamentos/${dadosAgendamento.id_agendamento}`, payload);
+            await axios.put(`http://localhost:8888/agendamentos/${dadosAgendamento.id_agendamento}`, payload);
           } else {
             // Lógica de CRIAÇÃO (POST)
             await axios.post("http://localhost:8888/agendamentos", payload);
@@ -314,11 +320,23 @@ const Consultas: React.FC = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire("Salvo!", "O agendamento foi salvo com sucesso.", "success");
+        Swal.fire({
+          title: "Salvo!",
+          text: "Agendamento salvo com sucesso.",
+          icon: "success",
+          confirmButtonText: "OK",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+            cancelButton: 'bg-color-secondary'
+          }
+        });
       }
     });
   };
 
+  if (loading) {
+    return <div><Loader /></div>;
+  }
 
   return (
     <div className="consultas-page">
@@ -415,9 +433,8 @@ const Consultas: React.FC = () => {
         <Button
           text="Página anterior"
           icon={faArrowLeft}
-          color="bg-color-secondary"
+          color={!table.getCanPreviousPage() ? "desabled bg-color-secondary" : "bg-color-secondary"}
           onClick={() => table.previousPage()}
-        // disabled={!table.getCanPreviousPage()}
         />
 
         <span className="text-sm">
@@ -427,9 +444,8 @@ const Consultas: React.FC = () => {
         <Button
           text="Próxima página"
           icon={faArrowRight}
-          color="bg-color-secondary"
+          color={!table.getCanNextPage() ? "desabled bg-color-secondary" : "bg-color-secondary"}
           onClick={() => table.nextPage()}
-        // disabled={!table.getCanNextPage()}
         />
       </div>
 

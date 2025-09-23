@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FastifyRequest, FastifyReply } from "fastify";
-import agendamentoService from "../services/agendamentoService";
+import agendamentoService from "../Services/agendamentoService";
 import type { Agendamentos } from "../models/Agendamento";
 
 type AgendamentoCreateRequest = FastifyRequest<{

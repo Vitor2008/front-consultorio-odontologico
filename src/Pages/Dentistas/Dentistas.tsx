@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import '../Consultas/Consultas.css'
 import axios from "axios";
 import type { Dentistas } from "../../models/Dentistas";
@@ -12,11 +12,19 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+import { format, parseISO } from "date-fns";
+import Swal from "sweetalert2";
 
 const ListaDentistas: React.FC = () => {
   const [dentistas, setDentistas] = useState<Dentistas[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDentistas = async () => {
@@ -24,9 +32,13 @@ const ListaDentistas: React.FC = () => {
         setDentistas(
           (await axios.get<Dentistas[]>("http://localhost:8888/dentistas")).data
         );
-      } catch (err) {
-        setError("Não foi possível carregar a lista de dentistas.");
-        console.error("Erro ao buscar dentistas:", err);
+      } catch (error) {
+        console.error("Erro ao buscar dados iniciais:", error);
+        Swal.fire(
+          "Erro",
+          "Não foi possível carregar os dados da página.",
+          "error"
+        );
       } finally {
         setLoading(false);
       }
@@ -35,12 +47,49 @@ const ListaDentistas: React.FC = () => {
     fetchDentistas();
   }, []);
 
+  const columns = useMemo<ColumnDef<Dentistas>[]>(
+    () => [
+      {
+        accessorKey: "nome_completo",
+        header: "Nome",
+        cell: (info) => info.getValue(),
+      },
+      {
+        accessorKey: "cro",
+        header: "CRO",
+        cell: (info) => info.getValue(),
+      },
+      {
+        accessorKey: "telefone",
+        header: "Telefone",
+        cell: (info) => info.getValue(),
+      },
+      {
+        accessorKey: "data_cadastro",
+        header: "Data Cadastro",
+        cell: (info) =>
+          format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
+      },
+    ],
+    []
+  );
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const table = useReactTable({
+    data: dentistas,
+    columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   if (loading) {
     return <div><Loader /></div>;
-  }
-
-  if (error) {
-    return <div className="text-red-400">{error}</div>;
   }
 
   return (
@@ -84,25 +133,72 @@ const ListaDentistas: React.FC = () => {
         />
       </div>
 
-      <h2>Dentistas Cadastrados</h2>
-      {dentistas.length === 0 ? (
-        <p>Nenhum dentista encontrado.</p>
-      ) : (
-        <ul className="p-4">
-          {dentistas.map((dentista) => (
-            <li
-              key={dentista.id_dentista}
-              className="border-2 border-amber-50 p-8 mb-4"
-            >
-              <strong>{dentista.nome_completo}</strong>
-              <p>CRO: {dentista.cro}</p>
-              <p>Telefone: {dentista.telefone}</p>
-              <p>endereco: {dentista.endereco}</p>
-              <p>data_nascimento: {dentista.data_nascimento}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Tabela */}
+      <div className="max-w-7xl mx-auto mt-6 overflow-x-auto">
+        <table className="min-w-full table-auto border border-gray-200 bg-white">
+          <thead className="bg-gray-100 bg-color-primary text-white">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="px-4 py-2 text-left text-sm font-medium"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="cursor-pointer hover:bg-gray-50"
+              // aqui você pode abrir modal com detalhes
+              // onClick={() => abrirModal(row.original)}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-2 text-sm text-gray-800">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Paginação */}
+      <div className="footer-table flex items-center justify-end mt-4 gap-4">
+        <Button
+          text="Página anterior"
+          icon={faArrowLeft}
+          color={
+            !table.getCanPreviousPage()
+              ? "desabled bg-color-secondary"
+              : "bg-color-secondary"
+          }
+          onClick={() => table.previousPage()}
+        />
+
+        <span className="text-sm">
+          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+        </span>
+
+        <Button
+          text="Próxima página"
+          icon={faArrowRight}
+          color={
+            !table.getCanNextPage()
+              ? "desabled bg-color-secondary"
+              : "bg-color-secondary"
+          }
+          onClick={() => table.nextPage()}
+        />
+      </div>
     </div>
   );
 };

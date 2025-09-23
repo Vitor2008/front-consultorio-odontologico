@@ -5,7 +5,6 @@ import logo from '../../assets/Img/logo.png'
 
 const NavBar = () => {
     const location = useLocation();
-    console.log('Location:', location.pathname);
     const [aberta, setAberta] = useState(false);
     return (
         <>

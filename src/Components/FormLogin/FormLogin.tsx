@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FormLogin.css";
 import axios from "axios";
@@ -33,8 +33,6 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
 
       const resposta = response.data;
       login(resposta.data);
-
-      console.log("Resposta do login: ", resposta);
       setMensagem(resposta.message);
       localStorage.setItem("usuario", JSON.stringify(resposta.usuario));
       navigate("/consultas");
@@ -75,6 +73,23 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       }
     }
   };
+
+  useEffect(() => {
+    if (!mensagem) return;
+
+    const limparMensagem = () => {
+      setMensagem("");
+    };
+
+    window.addEventListener("click", limparMensagem);
+    window.addEventListener("keydown", limparMensagem);
+
+    return () => {
+      window.removeEventListener("click", limparMensagem);
+      window.removeEventListener("keydown", limparMensagem);
+    };
+  }, [mensagem]);
+
 
   return tipo === "login" ? (
     <form className="form card-form-login" onSubmit={handleLogin}>

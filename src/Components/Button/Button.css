@@ -51,6 +51,12 @@
     opacity: 0.6;
 }
 
+.button.desabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @keyframes shine {
     0% {
         left: -100px;
@@ -68,7 +74,7 @@
 @media (max-width: 840px) {
     .button {
         font-size: 13px;
-        padding-block: 1rem;
-        padding-inline: 1rem;
+        padding-block: 0.8rem;
+        padding-inline: 0.8rem;
     }
 }
