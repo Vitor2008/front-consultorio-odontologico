@@ -2,8 +2,15 @@ import type { FastifyInstance } from "fastify";
 import clienteController from "../controllers/clienteController";
 import agendamentoController from "../controllers/agendamentoController";
 import dentistaController from "../controllers/dentistaController";
+import loginController from "../controllers/loginController";
+import atendenteController from "../controllers/atendenteController"
 
 export default async function clienteRoutes(fastify: FastifyInstance) {
+  // Define a rota POST para /login
+  fastify.post('/login', loginController.login);
+
+  fastify.post('/atendentes', atendenteController.cadastrar);
+
   // Rota para criar um cliente
   fastify.post("/clientes", clienteController.create);
 

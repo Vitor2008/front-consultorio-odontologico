@@ -36,7 +36,7 @@ export async function pegarConsultas(): Promise<ServiceResponse<Consulta[]>> {
 
 export async function todosPacienteConsultas() {
     try {
-        const queryText = "SELECT paciente FROM consultas";
+        const queryText = "SELECT paciente, medico FROM consultas";
         const result = await pool.query<Consulta>(queryText);
 
         if (result.rows.length === 0) {

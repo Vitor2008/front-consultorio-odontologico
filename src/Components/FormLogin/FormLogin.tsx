@@ -28,7 +28,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
     try {
       const response = await axios.post("http://localhost:8888/login", {
         email,
-        senha,
+        senha_plana: senha,
       });
 
       const resposta = response.data;
@@ -52,14 +52,14 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8888/cadastrar-usuario",
+        "http://localhost:8888/atendentes",
         {
-          nome,
-          email,
+          nome_completo: nome,
+          email_login: email,
           telefone,
           cpf,
-          dataNascimento,
-          senha,
+          data_nascimento: dataNascimento,
+          senha_plana: senha,
         }
       );
 
