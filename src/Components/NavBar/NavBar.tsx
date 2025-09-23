@@ -9,7 +9,7 @@ const NavBar = () => {
             <div className="navbar no-mobile">
                 <div className='flex'>
                     <img src={logo} width={40} alt='logo' />
-                    <h2 className="logo">OdontoVida</h2>
+                    <h2 className="logo">Sistema SISo</h2>
                 </div>
                 <ul className="nav-links">
                     <li><a href="/consultas">Consultas</a></li>

@@ -4,6 +4,8 @@ import {
   faPlus,
   faSearch,
   faHospitalUser,
+  faArrowLeft,
+  faArrowRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -11,6 +13,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import {
   useReactTable,
   getCoreRowModel,
+  getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
 import Swal from "sweetalert2";
@@ -144,10 +147,18 @@ const Consultas: React.FC = () => {
     []
   );
 
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10, // quantidade de linhas por página
+  });
+
   const table = useReactTable({
     data: agendamentosFiltrados,
     columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const handlePesquisar = () => {
@@ -172,11 +183,11 @@ const Consultas: React.FC = () => {
             <select id="campoCliente" class="border rounded-md p-2 w-full">
               <option value="">Selecione o paciente</option>
               ${clientes
-                .map(
-                  (c) =>
-                    `<option value="${c.id_cliente}">${c.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (c) =>
+              `<option value="${c.id_cliente}">${c.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -184,11 +195,11 @@ const Consultas: React.FC = () => {
             <select id="campoDentista" class="border rounded-md p-2 w-full">
               <option value="">Selecione o dentista</option>
               ${dentistas
-                .map(
-                  (d) =>
-                    `<option value="${d.id_dentista}">${d.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (d) =>
+              `<option value="${d.id_dentista}">${d.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -218,6 +229,11 @@ const Consultas: React.FC = () => {
       `,
       showCancelButton: true,
       confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: 'bg-color-primary',
+        cancelButton: 'bg-color-secondary'
+      },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
         if (isEditMode) {
@@ -302,6 +318,7 @@ const Consultas: React.FC = () => {
       }
     });
   };
+
 
   return (
     <div className="consultas-page">
@@ -393,6 +410,29 @@ const Consultas: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      <div className="footer-table flex items-center justify-end mt-4 gap-4">
+        <Button
+          text="Página anterior"
+          icon={faArrowLeft}
+          color="bg-color-secondary"
+          onClick={() => table.previousPage()}
+        // disabled={!table.getCanPreviousPage()}
+        />
+
+        <span className="text-sm">
+          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+        </span>
+
+        <Button
+          text="Próxima página"
+          icon={faArrowRight}
+          color="bg-color-secondary"
+          onClick={() => table.nextPage()}
+        // disabled={!table.getCanNextPage()}
+        />
+      </div>
+
     </div>
   );
 };

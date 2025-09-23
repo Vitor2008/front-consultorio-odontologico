@@ -15,7 +15,7 @@ const Login = () => {
                 <div className='flex'>
                     <img src={logo} width={70} alt='logo' />
                     <div className='text'>
-                        <h1>Clínica OdontoVida</h1>
+                        <h1>Sistema SISo</h1>
                         <p>Cuidando do seu sorriso com excelência e dedicação</p>
                     </div>
                 </div>

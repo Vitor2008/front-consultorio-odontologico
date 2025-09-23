@@ -80,7 +80,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
   return tipo === "login" ? (
     <form className="form card-form-login" onSubmit={handleLogin}>
       <p className="title">Entrar </p>
-      <p className="message">Acesse sua conta na Clínica OdontoVida</p>
+      <p className="message">Acesse sua conta no SISo</p>
       <label>
         <input
           placeholder=""
