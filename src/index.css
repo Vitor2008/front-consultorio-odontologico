@@ -55,8 +55,13 @@ a {
   display: none;
 }
 
-body{
+body {
   background-color: #e8e8e8;
+}
+
+.active a {
+  font-weight: bold;
+  border-bottom: 2px solid white;
 }
 
 @media (max-width: 1024px) {

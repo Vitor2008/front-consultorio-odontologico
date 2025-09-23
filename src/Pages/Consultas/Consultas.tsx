@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import {
   faPlus,
   faSearch,
-  faHospitalUser,
+  faFileMedical,
   faArrowLeft,
   faArrowRight
 } from "@fortawesome/free-solid-svg-icons";
@@ -326,7 +326,7 @@ const Consultas: React.FC = () => {
       <div className="sticky top-0 z-10 bg-white px-4 py-4 shadow">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold color-primary">
-            <FontAwesomeIcon icon={faHospitalUser} /> Consultas
+            <FontAwesomeIcon icon={faFileMedical} /> Consultas
           </h1>
           <Button
             text="Novo Agendamento"

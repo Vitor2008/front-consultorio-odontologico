@@ -28,12 +28,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   // Efeito para carregar o usuário do localStorage quando a página é carregada
-  useEffect(() => {
-    const storedUser = localStorage.getItem("usuario");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem("usuario");
+  //   console.log("Stored user: ", storedUser);
+
+  //   if (storedUser) {
+  //     setUser(JSON.parse(storedUser));
+  //   }
+  //   else {
+  //     window.location.href = "/";
+  //   }
+  // }, []);
+
 
   const login = (userData: User) => {
     setUser(userData);

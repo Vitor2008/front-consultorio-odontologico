@@ -34,12 +34,13 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       const resposta = response.data;
       login(resposta.data);
 
+      console.log("Resposta do login: ", resposta);
       setMensagem(resposta.message);
-      localStorage.setItem("usuario", JSON.stringify(resposta.data));
+      localStorage.setItem("usuario", JSON.stringify(resposta.usuario));
       navigate("/consultas");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        setMensagem(error.response.data.message || "Erro no login.");
+        setMensagem(error.response.data.error || "Erro no login.");
       } else {
         setMensagem("Erro de conexão com o servidor.");
       }
@@ -63,9 +64,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
         }
       );
 
-      const resposta = response.data;
-      console.log("Data response: ", resposta);
-      setMensagem(resposta.message + " Agora você pode fazer o login!");
+      setMensagem("Agora você pode fazer o login!");
       onTrocarTipo();
     } catch (error) {
       console.log("Erro do back: ", error);
