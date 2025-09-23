@@ -6,12 +6,13 @@ import Pacientes from "./Pages/Pacientes/Pacientes";
 import Medicos from "./Pages/Dentistas/Dentistas";
 import Financeiro from "./Pages/Financeiro/Financeiro";
 import Configuracoes from "./Pages/Configuracoes/Configuracoes";
+import Loader from "./Components/Loader/Loader";
 
 const Login = lazy(() => import("./Pages/Login/Login"));
 
 function App() {
   return (
-    <Suspense fallback={<div>Carregando...</div>}>
+    <Suspense fallback={<div><Loader/></div>}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route

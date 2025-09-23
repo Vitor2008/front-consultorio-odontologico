@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import type { Dentistas } from "../../models/Dentistas"; // Ajuste o caminho se necessário
+import type { Dentistas } from "../../models/Dentistas";
+import Loader from "../../Components/Loader/Loader";
 
 const ListaDentistas: React.FC = () => {
   const [dentistas, setDentistas] = useState<Dentistas[]>([]);
@@ -25,7 +26,7 @@ const ListaDentistas: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <div><Loader /></div>;
   }
 
   if (error) {
