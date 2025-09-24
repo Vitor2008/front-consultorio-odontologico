@@ -30,7 +30,7 @@ const Pacientes: React.FC = () => {
     const fetchPaciente = async () => {
       try {
         setPaciente(
-          (await axios.get<Cliente[]>("http://localhost:8888/clientes")).data
+          (await axios.get<Cliente[]>(`${import.meta.env.VITE_URL_SERVER}/clientes`)).data
         );
       } catch (error) {
         console.error("Erro ao buscar dentistas:", error);

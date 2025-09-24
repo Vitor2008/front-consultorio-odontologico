@@ -16,6 +16,7 @@ import {
 import Swal from "sweetalert2";
 import { isAfter, isBefore, format, parseISO } from "date-fns";
 import axios from "axios";
+import Loader from "../../Components/Loader/Loader";
 
 // 1. Interfaces atualizadas para corresponder ao backend
 interface Cliente {
@@ -46,6 +47,7 @@ const Consultas: React.FC = () => {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [dentistas, setDentistas] = useState<Dentista[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [dataInicioInput, setDataInicioInput] = useState("");
   const [dataFimInput, setDataFimInput] = useState("");
@@ -65,9 +67,9 @@ const Consultas: React.FC = () => {
       try {
         // Usamos Promise.all para fazer as requisições em paralelo
         const [resAgendamentos, resClientes, resDentistas] = await Promise.all([
-          axios.get("http://localhost:8888/agendamentos"),
-          axios.get("http://localhost:8888/clientes"),
-          axios.get("http://localhost:8888/dentistas"),
+          axios.get(`${import.meta.env.VITE_URL_SERVER}/agendamentos`),
+          axios.get(`${import.meta.env.VITE_URL_SERVER}/clientes`),
+          axios.get(`${import.meta.env.VITE_URL_SERVER}/dentistas`),
         ]);
 
         setAgendamentos(resAgendamentos.data || []);
@@ -80,6 +82,8 @@ const Consultas: React.FC = () => {
           "Não foi possível carregar os dados da página.",
           "error"
         );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -139,7 +143,33 @@ const Consultas: React.FC = () => {
       },
       { accessorKey: "nome_cliente", header: "Paciente" },
       { accessorKey: "nome_dentista", header: "Dentista" },
-      { accessorKey: "status_agendamento", header: "Status" },
+      {
+        accessorKey: "status_agendamento",
+        header: "Status",
+        cell: (info) => {
+          const status = info.getValue() as string;
+
+          let statusClass = "";
+          switch (status) {
+            case "Confirmado":
+              statusClass = "color-blue font-semibold";
+              break;
+            case "Cancelado Pelo Paciente":
+              statusClass = "color-red font-semibold";
+              break;
+            case "Agendado":
+              statusClass = "color-yellow font-semibold";
+              break;
+            case "Realizado":
+              statusClass = "color-green font-semibold";
+              break;
+            default:
+              statusClass = "";
+          }
+
+          return <span className={statusClass}>{status}</span>;
+        },
+      },
     ],
     []
   );
@@ -172,11 +202,11 @@ const Consultas: React.FC = () => {
             <select id="campoCliente" class="border rounded-md p-2 w-full">
               <option value="">Selecione o paciente</option>
               ${clientes
-                .map(
-                  (c) =>
-                    `<option value="${c.id_cliente}">${c.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (c) =>
+              `<option value="${c.id_cliente}">${c.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -184,11 +214,11 @@ const Consultas: React.FC = () => {
             <select id="campoDentista" class="border rounded-md p-2 w-full">
               <option value="">Selecione o dentista</option>
               ${dentistas
-                .map(
-                  (d) =>
-                    `<option value="${d.id_dentista}">${d.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (d) =>
+              `<option value="${d.id_dentista}">${d.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -218,6 +248,11 @@ const Consultas: React.FC = () => {
       `,
       showCancelButton: true,
       confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: 'bg-color-primary',
+        cancelButton: 'bg-color-secondary'
+      },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
         if (isEditMode) {
@@ -280,17 +315,17 @@ const Consultas: React.FC = () => {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
             await axios.post(
-              `http://localhost:8888/agendamentos/${dadosAgendamento.id_agendamento}`,
+              `${import.meta.env.VITE_URL_SERVER}/agendamentos/${dadosAgendamento.id_agendamento}`,
               payload
             );
           } else {
             // Lógica de CRIAÇÃO (POST)
-            await axios.post("http://localhost:8888/agendamentos", payload);
+            await axios.post(`${import.meta.env.VITE_URL_SERVER}/agendamentos`, payload);
           }
           // Recarregar os dados após o sucesso
           // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
           const response = await axios.get(
-            "http://localhost:8888/agendamentos"
+            `${import.meta.env.VITE_URL_SERVER}/agendamentos`
           );
           setAgendamentos(response.data || []);
           return true;
@@ -305,6 +340,10 @@ const Consultas: React.FC = () => {
       }
     });
   };
+
+  if (loading) {
+    return <div><Loader /></div>;
+  }
 
   return (
     <div className="consultas-page">

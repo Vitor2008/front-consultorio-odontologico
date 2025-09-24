@@ -55,13 +55,30 @@ a {
   display: none;
 }
 
-body {
+body,
+.layout-main {
   background-color: #e8e8e8;
 }
 
 .active a {
   font-weight: bold;
   border-bottom: 2px solid white;
+}
+
+.color-green {
+  color: oklch(44.8% 0.119 151.328);
+}
+
+.color-yellow {
+  color: oklch(79.5% 0.184 86.047);
+}
+
+.color-red {
+  color: oklch(57.7% 0.245 27.325);
+}
+
+.color-blue {
+  color: oklch(48.8% 0.243 264.376);
 }
 
 @media (max-width: 1024px) {

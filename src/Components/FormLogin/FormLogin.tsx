@@ -26,7 +26,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
     setMensagem("Entrando...");
 
     try {
-      const response = await axios.post("http://localhost:8888/login", {
+      const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/login`, {
         email,
         senha_plana: senha,
       });
@@ -51,7 +51,7 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8888/atendentes",
+        `R${import.meta.env.VITE_URL_SERVER}/atendentes`,
         {
           nome_completo: nome,
           email_login: email,

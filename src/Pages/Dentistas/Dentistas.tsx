@@ -30,7 +30,7 @@ const ListaDentistas: React.FC = () => {
     const fetchDentistas = async () => {
       try {
         setDentistas(
-          (await axios.get<Dentistas[]>("http://localhost:8888/dentistas")).data
+          (await axios.get<Dentistas[]>(`${import.meta.env.VITE_URL_SERVER}/dentistas`)).data
         );
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);

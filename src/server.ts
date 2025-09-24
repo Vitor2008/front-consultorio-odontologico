@@ -8,7 +8,7 @@ import cors from "@fastify/cors";
 const app = fastify();
 
 app.register(cors, {
-  origin: "http://localhost:5173", // Permite requisições APENAS do seu frontend Vite
+  origin: process.env.URL_FRONT, // Permite requisições APENAS do seu frontend Vite
 });
 
 app.register(registerAllRoutes);
