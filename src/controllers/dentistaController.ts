@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FastifyRequest, FastifyReply } from "fastify";
-import DentistaService from "../services/dentistaService";
+import DentistaService from "../Services/dentistaService";
 import type { Dentistas } from "../models/Dentistas";
 
 // Tipo para os dados de criação que vêm do corpo da requisição

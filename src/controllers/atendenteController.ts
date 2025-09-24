@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FastifyRequest, FastifyReply } from "fastify";
-import atendenteService from "../services/atendenteService";
+import atendenteService from "../Services/atendenteService";
 import type { CadastroAtendentePayload } from "../models/Login";
 
 class AtendenteController {

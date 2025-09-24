@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FastifyRequest, FastifyReply } from "fastify";
-import loginService from "../services/loginService";
+import loginService from "../Services/loginService";
 import type { LoginPayload } from "../models/Login";
 
 class LoginController {

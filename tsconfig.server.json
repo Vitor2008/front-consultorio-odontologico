@@ -8,6 +8,6 @@
         "noEmit": false,
         "esModuleInterop": true 
     }, 
-  "include": ["src/server.ts", "src/controllers", "src/services"], // Inclua aqui todos os arquivos/pastas do seu backend
+  "include": ["src/server.ts", "src/controllers", "src/Services"], // Inclua aqui todos os arquivos/pastas do seu backend
   "exclude": ["src/Components", "src/Pages", "src/App.tsx", "src/main.tsx"] // Exclua os arquivos do frontend
 }
