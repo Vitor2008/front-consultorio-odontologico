@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+// import bcrypt from "bcrypt";
+import * as bcrypt from 'bcrypt';
+// import jwt from "jsonwebtoken";
+import * as jwt from 'jsonwebtoken';
 import atendenteRepository from "../repositories/atendenteRepository";
 import type { LoginPayload } from "../models/Login";
 

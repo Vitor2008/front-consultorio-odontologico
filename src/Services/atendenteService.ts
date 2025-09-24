@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import atendenteRepository from '../repositories/atendenteRepository';
 import type { CadastroAtendentePayload } from '../models/Login';
 

@@ -15,7 +15,7 @@ COPY . .
 COPY nginx.conf .
 
 # O script 'build' do seu package.json já deve rodar 'vite build'
-RUN npm run build
+RUN npm run build:front
 
 # --- Etapa 2: Servidor Web (Nginx) ---
 FROM nginx:1.25-alpine

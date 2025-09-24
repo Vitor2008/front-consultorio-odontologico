@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { pool } from "../lib/db";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
+import * as bcrypt from 'bcrypt';
 import type { LoginPayload } from "../models/Login";
 
 class LoginRepository {
