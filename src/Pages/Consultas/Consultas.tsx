@@ -4,6 +4,8 @@ import {
   faPlus,
   faSearch,
   faHospitalUser,
+  faArrowLeft,
+  faArrowRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -11,6 +13,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import {
   useReactTable,
   getCoreRowModel,
+  getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
 import Swal from "sweetalert2";
@@ -126,20 +129,22 @@ const Consultas: React.FC = () => {
   const columns = useMemo<ColumnDef<Agendamento>[]>(
     () => [
       {
-        accessorKey: "data_hora_inicio",
+        accessorKey: "data_hora_inicio_data",
         header: "Data",
         cell: (info) =>
-          format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
+          format(parseISO(info.row.original.data_hora_inicio), "dd/MM/yyyy"),
       },
       {
-        accessorKey: "data_hora_inicio",
+        accessorKey: "data_hora_inicio_hora",
         header: "Início",
-        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
+        cell: (info) =>
+          format(parseISO(info.row.original.data_hora_inicio), "HH:mm"),
       },
       {
         accessorKey: "data_hora_fim",
         header: "Término",
-        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
+        cell: (info) =>
+          format(parseISO(info.getValue() as string), "HH:mm"),
       },
       { accessorKey: "nome_cliente", header: "Paciente" },
       { accessorKey: "nome_dentista", header: "Dentista" },
@@ -174,10 +179,18 @@ const Consultas: React.FC = () => {
     []
   );
 
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const table = useReactTable({
     data: agendamentosFiltrados,
     columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const handlePesquisar = () => {
@@ -434,6 +447,34 @@ const Consultas: React.FC = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Paginação */}
+      <div className="footer-table flex items-center justify-end mt-4 gap-4">
+        <Button
+          text="Página anterior"
+          icon={faArrowLeft}
+          color={
+            !table.getCanPreviousPage()
+              ? "desabled bg-color-secondary"
+              : "bg-color-secondary"
+          }
+          onClick={() => table.previousPage()}
+        />
+
+        <span className="text-sm">
+          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+        </span>
+
+        <Button
+          text="Próxima página"
+          icon={faArrowRight}
+          color={
+            !table.getCanNextPage()
+              ? "desabled bg-color-secondary"
+              : "bg-color-secondary"
+          }
+          onClick={() => table.nextPage()}
+        />
       </div>
     </div>
   );
