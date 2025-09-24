@@ -3,32 +3,43 @@ import clienteController from "../controllers/clienteController";
 import agendamentoController from "../controllers/agendamentoController";
 import dentistaController from "../controllers/dentistaController";
 import loginController from "../controllers/loginController";
-import atendenteController from "../controllers/atendenteController"
+import atendenteController from "../controllers/atendenteController";
 
-export default async function clienteRoutes(fastify: FastifyInstance) {
-  // Define a rota POST para /login
-  fastify.post('/login', loginController.login);
+async function agendamentoRoutes(app: FastifyInstance) {
+  // Rotas específicas para agendamentos
+  app.post("/", agendamentoController.create);
+  app.get("/", agendamentoController.findAll);
+  app.post("/:id", agendamentoController.update);
+}
 
-  fastify.post('/atendentes', atendenteController.cadastrar);
+async function atendenteRoutes(app: FastifyInstance) {
+  // Rotas específicas para atendentes
+  app.post("/", atendenteController.cadastrar);
+}
 
-  // Rota para criar um cliente
-  fastify.post("/clientes", clienteController.create);
+async function dentistaRoutes(app: FastifyInstance) {
+  // Rotas específicas para dentistas
+  app.post("/", dentistaController.create);
+  app.get("/", dentistaController.findAll);
+  app.post("/:id", dentistaController.update);
+}
 
-  // Rota para listar todos os clientes
-  fastify.get("/clientes", clienteController.findAll);
+async function pacienteRoutes(app: FastifyInstance) {
+  // Rotas específicas para clientes/pacientes
+  app.post("/", clienteController.create);
+  app.get("/", clienteController.findAll);
+  app.post("/:id", clienteController.update);
+}
 
-  // Rota para buscar um cliente por ID
-  fastify.get("/clientes/:id", clienteController.findById);
+async function loginRoutes(app: FastifyInstance) {
+  // Rota de login
+  app.post("/", loginController.login); // Alterado para "/" já que o prefixo será "/login"
+}
 
-  // Rota para criar um agendamento
-  fastify.post("/agendamentos", agendamentoController.create);
-
-  // Rota para listar todos os agendamentos
-  fastify.get("/agendamentos", agendamentoController.findAll);
-
-  // Rota para criar um agendamento
-  fastify.post("/dentistas", dentistaController.create);
-
-  // Rota para listar todos os agendamentos
-  fastify.get("/dentistas", dentistaController.findAll);
+export default function registerAllRoutes(app: FastifyInstance) {
+  app.register(agendamentoRoutes, { prefix: "/agendamentos" });
+  app.register(atendenteRoutes, { prefix: "/atendentes" });
+  app.register(dentistaRoutes, { prefix: "/dentistas" });
+  app.register(pacienteRoutes, { prefix: "/clientes" });
+  app.register(loginRoutes, { prefix: "/login" });
 }

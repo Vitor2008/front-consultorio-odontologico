@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import fastify from "fastify";
-import routes from "./routes/routes";
+import registerAllRoutes from "./routes/routes";
 import cors from "@fastify/cors";
 
 const app = fastify();
@@ -11,7 +11,7 @@ app.register(cors, {
   origin: "http://localhost:5173", // Permite requisições APENAS do seu frontend Vite
 });
 
-app.register(routes);
+app.register(registerAllRoutes);
 
 const PORT = 8888;
 

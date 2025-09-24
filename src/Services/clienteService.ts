@@ -9,6 +9,16 @@ class ClienteService {
     return novoCliente;
   }
 
+  async update(id: number, data: Partial<Cliente>): Promise<Cliente> {
+    const clienteAtualizado = await clienteRepository.update(id, data);
+
+    if (!clienteAtualizado) {
+      throw new Error("Cliente não encontrado.");
+    }
+
+    return clienteAtualizado;
+  }
+
   async findAll(): Promise<Cliente[]> {
     return clienteRepository.findAll();
   }

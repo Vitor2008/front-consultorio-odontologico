@@ -9,6 +9,16 @@ class DentistaService {
     return novoDentista;
   }
 
+  async update(id: number, data: Partial<Dentistas>): Promise<Dentistas> {
+    const dentistaAtualizado = await DentistaRepository.update(id, data);
+
+    if (!dentistaAtualizado) {
+      throw new Error("Dentista não encontrado.");
+    }
+
+    return dentistaAtualizado;
+  }
+
   async findAll(): Promise<Dentistas[]> {
     return DentistaRepository.findAll();
   }

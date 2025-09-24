@@ -8,14 +8,20 @@ class AgendamentoService {
    * Orquestra a criação de um novo agendamento.
    */
   async create(data: AgendamentoCreateData): Promise<Agendamentos> {
-    // Regra de Negócio: Verificar se o horário já está ocupado para aquele dentista
-    // (A constraint no banco de dados já faz isso, mas validar aqui retorna um erro melhor)
-    // const conflito = await agendamentoRepository.findByDentistaAndHorario(data.id_dentista, data.data_hora_inicio);
-    // if (conflito) {
-    //   throw new Error("Este horário já está ocupado para o dentista selecionado.");
-    // }
-
     return agendamentoRepository.create(data);
+  }
+
+  /**
+   * Atualiza um agendamento existente.
+   */
+  async update(id: number, data: Partial<Agendamentos>): Promise<Agendamentos> {
+    const agendamentoAtualizado = await agendamentoRepository.update(id, data);
+
+    if (!agendamentoAtualizado) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    return agendamentoAtualizado;
   }
 
   /**

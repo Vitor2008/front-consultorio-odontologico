@@ -39,6 +39,21 @@ class AgendamentoRepository {
     return result.rows[0];
   }
 
+  async update(
+    id: number,
+    data: Partial<Agendamentos>
+  ): Promise<Agendamentos | null> {
+    const fields = Object.keys(data)
+      .map((key, index) => `"${key}" = $${index + 2}`)
+      .join(", ");
+    const values = Object.values(data);
+
+    const queryText = `UPDATE agendamentos SET ${fields} WHERE id_agendamento = $1 RETURNING *`;
+    const result = await pool.query<Agendamentos>(queryText, [id, ...values]);
+
+    return result.rows[0] || null;
+  }
+
   async findAll(): Promise<Agendamentos[]> {
     const queryText = `
       SELECT

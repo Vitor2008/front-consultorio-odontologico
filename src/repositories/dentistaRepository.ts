@@ -20,6 +20,21 @@ class DentistaRepository {
     return result.rows[0];
   }
 
+  async update(
+    id: number,
+    data: Partial<Dentistas>
+  ): Promise<Dentistas | null> {
+    const fields = Object.keys(data)
+      .map((key, index) => `"${key}" = $${index + 2}`)
+      .join(", ");
+    const values = Object.values(data);
+
+    const queryText = `UPDATE dentistas SET ${fields} WHERE id_dentista = $1 RETURNING *`;
+    const result = await pool.query<Dentistas>(queryText, [id, ...values]);
+
+    return result.rows[0] || null;
+  }
+
   async findAll(): Promise<Dentistas[]> {
     const queryText = "SELECT * FROM dentistas ORDER BY nome_completo ASC";
     const result = await pool.query<Dentistas>(queryText);

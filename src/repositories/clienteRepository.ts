@@ -20,6 +20,18 @@ class ClienteRepository {
     return result.rows[0];
   }
 
+  async update(id: number, data: Partial<Cliente>): Promise<Cliente | null> {
+    const fields = Object.keys(data)
+      .map((key, index) => `"${key}" = $${index + 2}`)
+      .join(", ");
+    const values = Object.values(data);
+
+    const queryText = `UPDATE clientes SET ${fields} WHERE id_client e= $1 RETURNING *`;
+    const result = await pool.query<Cliente>(queryText, [id, ...values]);
+
+    return result.rows[0] || null;
+  }
+
   async findAll(): Promise<Cliente[]> {
     const queryText = "SELECT * FROM clientes ORDER BY nome_completo ASC";
     const result = await pool.query<Cliente>(queryText);

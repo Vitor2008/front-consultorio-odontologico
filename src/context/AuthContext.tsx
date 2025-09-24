@@ -3,10 +3,9 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import type { ReactNode } from "react";
 
 interface User {
-  id: number;
-  nome: string;
-  email: string;
-  cpf: string;
+  email_login: string;
+  id_atendente: number;
+  nome_completo: string;
 }
 
 // 2. Defina o que o seu contexto irá fornecer
@@ -28,18 +27,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   // Efeito para carregar o usuário do localStorage quando a página é carregada
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem("usuario");
-  //   console.log("Stored user: ", storedUser);
-
-  //   if (storedUser) {
-  //     setUser(JSON.parse(storedUser));
-  //   }
-  //   else {
-  //     window.location.href = "/";
-  //   }
-  // }, []);
-
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser != null) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);

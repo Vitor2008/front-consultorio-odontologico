@@ -1,12 +1,9 @@
 import "./Consultas.css";
 import React, { useState, useMemo, useEffect } from "react";
-import Loader from "../../Components/Loader/Loader";
 import {
   faPlus,
   faSearch,
-  faFileMedical,
-  faArrowLeft,
-  faArrowRight
+  faHospitalUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -14,7 +11,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import {
   useReactTable,
   getCoreRowModel,
-  getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
 import Swal from "sweetalert2";
@@ -46,8 +42,6 @@ interface Agendamento {
 }
 
 const Consultas: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  
   // 2. Estados para armazenar todos os dados que a página precisa
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -86,8 +80,6 @@ const Consultas: React.FC = () => {
           "Não foi possível carregar os dados da página.",
           "error"
         );
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -127,44 +119,35 @@ const Consultas: React.FC = () => {
   }, [agendamentos, clientes, dentistas, filtros]);
 
   // 4. Colunas da tabela atualizadas para usar os dados corretos
-  const columns = useMemo<ColumnDef<Agendamento>[]>(() => [
-    {
-      accessorKey: "data_hora_inicio",
-      header: "Data",
-      cell: (info) =>
-        format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
-    },
-    {
-      accessorFn: (row) => row.data_hora_inicio,
-      id: "hora_inicio", // ID único para evitar conflito
-      header: "Início",
-      cell: (info) =>
-        format(parseISO(info.getValue() as string), "HH:mm"),
-    },
-    {
-      accessorKey: "data_hora_fim",
-      header: "Término",
-      cell: (info) =>
-        format(parseISO(info.getValue() as string), "HH:mm"),
-    },
-    { accessorKey: "nome_cliente", header: "Paciente" },
-    { accessorKey: "nome_dentista", header: "Dentista" },
-    { accessorKey: "status_agendamento", header: "Status" },
-  ], []);
-
-
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10, // quantidade de linhas por página
-  });
+  const columns = useMemo<ColumnDef<Agendamento>[]>(
+    () => [
+      {
+        accessorKey: "data_hora_inicio",
+        header: "Data",
+        cell: (info) =>
+          format(parseISO(info.getValue() as string), "dd/MM/yyyy"),
+      },
+      {
+        accessorKey: "data_hora_inicio",
+        header: "Início",
+        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
+      },
+      {
+        accessorKey: "data_hora_fim",
+        header: "Término",
+        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
+      },
+      { accessorKey: "nome_cliente", header: "Paciente" },
+      { accessorKey: "nome_dentista", header: "Dentista" },
+      { accessorKey: "status_agendamento", header: "Status" },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: agendamentosFiltrados,
     columns,
-    state: { pagination },
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const handlePesquisar = () => {
@@ -189,11 +172,11 @@ const Consultas: React.FC = () => {
             <select id="campoCliente" class="border rounded-md p-2 w-full">
               <option value="">Selecione o paciente</option>
               ${clientes
-          .map(
-            (c) =>
-              `<option value="${c.id_cliente}">${c.nome_completo}</option>`
-          )
-          .join("")}
+                .map(
+                  (c) =>
+                    `<option value="${c.id_cliente}">${c.nome_completo}</option>`
+                )
+                .join("")}
             </select>
           </div>
           <div>
@@ -201,11 +184,11 @@ const Consultas: React.FC = () => {
             <select id="campoDentista" class="border rounded-md p-2 w-full">
               <option value="">Selecione o dentista</option>
               ${dentistas
-          .map(
-            (d) =>
-              `<option value="${d.id_dentista}">${d.nome_completo}</option>`
-          )
-          .join("")}
+                .map(
+                  (d) =>
+                    `<option value="${d.id_dentista}">${d.nome_completo}</option>`
+                )
+                .join("")}
             </select>
           </div>
           <div>
@@ -235,11 +218,6 @@ const Consultas: React.FC = () => {
       `,
       showCancelButton: true,
       confirmButtonText: "Salvar",
-      cancelButtonText: "Cancelar",
-      customClass: {
-        confirmButton: 'bg-color-primary',
-        cancelButton: 'bg-color-secondary'
-      },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
         if (isEditMode) {
@@ -301,7 +279,10 @@ const Consultas: React.FC = () => {
         try {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
-            await axios.put(`http://localhost:8888/agendamentos/${dadosAgendamento.id_agendamento}`, payload);
+            await axios.post(
+              `http://localhost:8888/agendamentos/${dadosAgendamento.id_agendamento}`,
+              payload
+            );
           } else {
             // Lógica de CRIAÇÃO (POST)
             await axios.post("http://localhost:8888/agendamentos", payload);
@@ -320,23 +301,10 @@ const Consultas: React.FC = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "Salvo!",
-          text: "Agendamento salvo com sucesso.",
-          icon: "success",
-          confirmButtonText: "OK",
-          customClass: {
-            confirmButton: 'bg-color-primary',
-            cancelButton: 'bg-color-secondary'
-          }
-        });
+        Swal.fire("Salvo!", "O agendamento foi salvo com sucesso.", "success");
       }
     });
   };
-
-  if (loading) {
-    return <div><Loader /></div>;
-  }
 
   return (
     <div className="consultas-page">
@@ -344,7 +312,7 @@ const Consultas: React.FC = () => {
       <div className="sticky top-0 z-10 bg-white px-4 py-4 shadow">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold color-primary">
-            <FontAwesomeIcon icon={faFileMedical} /> Consultas
+            <FontAwesomeIcon icon={faHospitalUser} /> Consultas
           </h1>
           <Button
             text="Novo Agendamento"
@@ -428,27 +396,6 @@ const Consultas: React.FC = () => {
           </tbody>
         </table>
       </div>
-
-      <div className="footer-table flex items-center justify-end mt-4 gap-4">
-        <Button
-          text="Página anterior"
-          icon={faArrowLeft}
-          color={!table.getCanPreviousPage() ? "desabled bg-color-secondary" : "bg-color-secondary"}
-          onClick={() => table.previousPage()}
-        />
-
-        <span className="text-sm">
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-        </span>
-
-        <Button
-          text="Próxima página"
-          icon={faArrowRight}
-          color={!table.getCanNextPage() ? "desabled bg-color-secondary" : "bg-color-secondary"}
-          onClick={() => table.nextPage()}
-        />
-      </div>
-
     </div>
   );
 };

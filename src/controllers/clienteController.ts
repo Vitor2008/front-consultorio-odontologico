@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FastifyRequest, FastifyReply } from "fastify";
-import clienteService from "../Services/clienteService";
+import clienteService from "../services/clienteService";
 import type { Cliente } from "../models/Cliente";
 
 // Tipo para os dados de criação que vêm do corpo da requisição
@@ -18,6 +18,25 @@ class ClienteController {
       reply.status(201).send(novoCliente);
     } catch (error: any) {
       reply.status(500).send({ error: error.message });
+    }
+  }
+
+  async update(
+    request: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const clienteAtualizado = await clienteService.update(
+        request.params.id,
+        request.body as Partial<Cliente>
+      );
+      reply.status(200).send(clienteAtualizado);
+    } catch (error: any) {
+      if (error.message === "Cliente não encontrado.") {
+        reply.status(404).send({ error: error.message });
+      } else {
+        reply.status(400).send({ error: error.message });
+      }
     }
   }
 
