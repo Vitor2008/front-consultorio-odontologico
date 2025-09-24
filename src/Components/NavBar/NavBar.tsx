@@ -1,11 +1,12 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import './NavBar.css'
 import logo from '../../assets/Img/logo.png'
 
 const NavBar = () => {
     const location = useLocation();
-    const [aberta, setAberta] = useState(false);
+    // const [aberta, setAberta] = useState(false);
+    
     return (
         <>
             <div className="navbar no-mobile">

@@ -7,7 +7,6 @@ class LoginController {
   async login(request: FastifyRequest, reply: FastifyReply) {
     try {
       const payload = request.body as LoginPayload;
-
       if (!payload.email || !payload.senha_plana) {
         return reply
           .status(400)

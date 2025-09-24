@@ -33,6 +33,7 @@ async function pacienteRoutes(app: FastifyInstance) {
 
 async function loginRoutes(app: FastifyInstance) {
   // Rota de login
+  console.log("Entrou rota de login")
   app.post("/", loginController.login); // Alterado para "/" já que o prefixo será "/login"
 }
 

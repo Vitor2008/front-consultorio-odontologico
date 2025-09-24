@@ -1,10 +1,6 @@
 import "../Consultas/Consultas.css";
 import './Financeiro.css'
-import {
-    faPlus,
-    faSearch,
-    faDollarSign
-} from "@fortawesome/free-solid-svg-icons";
+import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Financeiro = () => {

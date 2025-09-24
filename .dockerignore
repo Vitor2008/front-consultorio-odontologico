@@ -4,6 +4,6 @@ dist
 .gitignore
 docker-compose.yml
 *.log
-.env
+# .env
 Dockerfile*
 docker-compose.yml
