@@ -10,7 +10,8 @@
 }
 
 .card-form-login {
-    height: 360px;
+    /* height: 360px; */
+    height: 330px;
 }
 
 .form-register {
@@ -126,6 +127,12 @@
 
 .submit:hover {
     background-color: rgb(56, 90, 194);
+}
+
+.error-message {
+    text-align: center;
+    color: red;
+    font-weight: 600;
 }
 
 @keyframes pulse {

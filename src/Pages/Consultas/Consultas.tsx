@@ -39,6 +39,7 @@ interface Agendamento {
   data_hora_inicio: string;
   data_hora_fim: string;
   status_agendamento: string;
+  valor_consulta: string,
   observacoes?: string;
   // Adicionamos os nomes para facilitar a exibição na tabela
   nome_cliente?: string;
@@ -81,11 +82,11 @@ const Consultas: React.FC = () => {
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
         Swal.fire({
-            title: "Erro",
-            text: "Não foi possível carregar os dados da página.",
-            customClass: {
-              confirmButton: 'bg-color-primary',
-            },
+          title: "Erro",
+          text: "Não foi possível carregar os dados da página.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
         });
       } finally {
         setLoading(false);
@@ -211,7 +212,7 @@ const Consultas: React.FC = () => {
     Swal.fire({
       title: isEditMode ? "Editar Agendamento" : "Novo Agendamento",
       html: `
-        <div class="modal grid grid-cols-1 gap-4 text-left p-4">
+        <div class="modal grid grid-cols-1 gap-4 text-left">
           <div>
             <label for="campoCliente" class="block font-medium text-gray-700">Paciente:*</label>
             <select id="campoCliente" class="border rounded-md p-2 w-full">
@@ -250,14 +251,24 @@ const Consultas: React.FC = () => {
               <input type="time" id="campoHoraFim" class="border rounded-md p-2 w-full" />
             </div>
           </div>
+          <div class="flex gap-4 items-center">
+            <div>
+              <label for="campoStatus" class="block font-medium text-gray-700">Status:*</label>
+              <select id="campoStatus" class="border rounded-md p-2 w-full">
+                  <option value="Agendado">Agendado</option>
+                  <option value="Confirmado">Confirmado</option>
+                  <option value="Realizado">Realizado</option>
+                  <option value="Cancelado Pelo Paciente">Cancelado Pelo Paciente</option>
+              </select>
+            </div>
+            <div>
+              <label for="campoValor" class="block font-medium text-gray-700">Valor consulta:*</label>
+              <input type="number" id="campoValor" class="border rounded-md p-2 w-full" />
+            </div>
+          </div>
           <div>
-            <label for="campoStatus" class="block font-medium text-gray-700">Status:*</label>
-            <select id="campoStatus" class="border rounded-md p-2 w-full">
-                <option value="Agendado">Agendado</option>
-                <option value="Confirmado">Confirmado</option>
-                <option value="Realizado">Realizado</option>
-                <option value="Cancelado Pelo Paciente">Cancelado Pelo Paciente</option>
-            </select>
+            <label for="campoObervacao" class="block font-medium text-gray-700">Observação:</label>
+            <textarea id="campoObervacao" class="border w-full" row="3"></textarea>
           </div>
         </div>
       `,
@@ -288,6 +299,10 @@ const Consultas: React.FC = () => {
             format(parseISO(dadosAgendamento.data_hora_fim!), "HH:mm");
           (document.getElementById("campoStatus") as HTMLSelectElement).value =
             dadosAgendamento.status_agendamento || "Agendado";
+          (document.getElementById("campoValor") as HTMLSelectElement).value =
+            dadosAgendamento.valor_consulta || "";
+          (document.getElementById("campoObervacao") as HTMLSelectElement).value =
+            dadosAgendamento.observacoes || "";
         }
       },
       preConfirm: async () => {
@@ -309,14 +324,20 @@ const Consultas: React.FC = () => {
         const status_agendamento = (
           document.getElementById("campoStatus") as HTMLSelectElement
         ).value;
+        const valor_consulta = (
+          document.getElementById("campoValor") as HTMLSelectElement
+        ).value;
+        const observacoes = (
+          document.getElementById("campoObervacao") as HTMLSelectElement
+        ).value;
 
-        if (!id_cliente || !id_dentista || !data || !hora_inicio || !hora_fim) {
+        if (!id_cliente || !id_dentista || !data || !hora_inicio || !hora_fim || !valor_consulta) {
           Swal.fire({
-              title: "Erro",
-              text: "Por favor, preencha todos os campos obrigatórios.",
-              customClass: {
-                confirmButton: 'bg-color-primary',
-              },
+            title: "Erro",
+            text: "Por favor, preencha todos os campos obrigatórios.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
           });
           return false;
         }
@@ -327,6 +348,8 @@ const Consultas: React.FC = () => {
           data_hora_inicio: `${data}T${hora_inicio}:00`,
           data_hora_fim: `${data}T${hora_fim}:00`,
           status_agendamento,
+          valor_consulta,
+          observacoes,
           status_pagamento: "Pendente", // Valor padrão
         };
 
@@ -350,11 +373,11 @@ const Consultas: React.FC = () => {
           return true;
         } catch (error) {
           Swal.fire({
-              title: "Erro",
-              text: `Erro ao salvar: ${error}`,
-              customClass: {
-                confirmButton: 'bg-color-primary',
-              },
+            title: "Erro",
+            text: `Erro ao salvar: ${error}`,
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
           });
           return false;
         }
@@ -362,11 +385,11 @@ const Consultas: React.FC = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
-            title: "Salvo!",
-            text: "O agendamento foi salvo com sucesso.",
-            customClass: {
-              confirmButton: 'bg-color-primary',
-            },
+          title: "Salvo!",
+          text: "O agendamento foi salvo com sucesso.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
         });
       }
     });

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../Consultas/Consultas.css";
+import "./Pacientes.css";
 import type { Cliente } from "../../models/Cliente";
 import axios from "axios";
 import Loader from "../../Components/Loader/Loader";
@@ -35,11 +36,11 @@ const Pacientes: React.FC = () => {
       } catch (error) {
         console.error("Erro ao buscar dentistas:", error);
         Swal.fire({
-            title: "Erro",
-            text: "Não foi possível carregar os dados da página.",
-            customClass: {
-              confirmButton: 'bg-color-primary',
-            },
+          title: "Erro",
+          text: "Não foi possível carregar os dados da página.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
         });
       } finally {
         setLoading(false);
@@ -90,6 +91,150 @@ const Pacientes: React.FC = () => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const abrirModal = (dadosCliente: Partial<Cliente> = {}) => {
+    const isEditMode = !!dadosCliente.id_cliente;
+
+    Swal.fire({
+      title: isEditMode ? "Editar Cliente" : "Novo Cliente",
+      html: `
+        <div class="modal grid grid-cols-1 gap-4 text-left">
+          <div>
+            <label for="nomeCliente" class="block font-medium text-gray-700">Nome Completo:*</label>
+            <input type="text" id="nomeCliente" class="border rounded-md p-2 w-full" />
+          </div>
+          <div class="flex items-center gap-4">
+            <div>
+              <label for="campoCpf" class="block font-medium text-gray-700">CPF:*</label>
+              <input type="text" id="campoCpf" class="border rounded-md p-2 w-full" />
+            </div>
+            <div class="input-data">
+              <label for="dataNascimento" class="block font-medium text-gray-700">Data Nascimento:*</label>
+              <input type="date" id="dataNascimento" class="border rounded-md p-2 w-full" />
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div>
+              <label for="campoTelefone" class="block font-medium text-gray-700">Telefone:*</label>
+              <input type="number" id="campoTelefone" class="border rounded-md p-2 w-full" />
+            </div>
+            <div class="input-data">
+              <label for="dataCadastro" class="block font-medium text-gray-700">Data Cadastro:*</label>
+              <input type="date" id="dataCadastro" class="border rounded-md p-2 w-full" disabled />
+            </div>
+          </div>
+          <div>
+            <label for="campoEndereco" class="block font-medium text-gray-700">Endereço:*:</label>
+            <textarea id="campoEndereco" class="border w-full" row="3"></textarea>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: 'bg-color-primary',
+        cancelButton: 'bg-color-secondary'
+      },
+      didOpen: () => {
+        // Preenche os campos se estiver no modo de edição
+        if (isEditMode) {
+          (document.getElementById("nomeCliente") as HTMLSelectElement).value =
+            String(dadosCliente.nome_completo || "");
+          (
+            document.getElementById("campoCpf") as HTMLSelectElement
+          ).value = String(dadosCliente.cpf || "");
+          (document.getElementById("dataNascimento") as HTMLInputElement).value =
+            format(parseISO(dadosCliente.data_nascimento!), "yyyy-MM-dd");
+          (document.getElementById("campoTelefone") as HTMLSelectElement).value =
+            dadosCliente.telefone || "";
+          (document.getElementById("dataCadastro") as HTMLInputElement).value =
+            format(parseISO(dadosCliente.data_cadastro!), "yyyy-MM-dd");
+          (document.getElementById("campoEndereco") as HTMLSelectElement).value =
+            dadosCliente.endereco || "";
+        }
+      },
+      preConfirm: async () => {
+        // 6. Lógica de confirmação para enviar os dados corretos para a API
+        const nome_completo = (
+          document.getElementById("nomeCliente") as HTMLSelectElement
+        ).value;
+        const cpf = (
+          document.getElementById("campoCpf") as HTMLSelectElement
+        ).value;
+        const data_nascimento = (document.getElementById("dataNascimento") as HTMLInputElement)
+          .value;
+        const telefone = (
+          document.getElementById("campoTelefone") as HTMLInputElement
+        ).value;
+        const data_cadastro = (
+          document.getElementById("dataCadastro") as HTMLInputElement
+        ).value;
+        const endereco = (
+          document.getElementById("campoEndereco") as HTMLSelectElement
+        ).value;
+
+        if (!nome_completo || !cpf || !data_nascimento || !telefone || !endereco) {
+          Swal.fire({
+            title: "Erro",
+            text: "Por favor, preencha todos os campos obrigatórios.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+          });
+          return false;
+        }
+
+        const payload = {
+          nome_completo,
+          cpf,
+          data_nascimento,
+          telefone,
+          data_cadastro,
+          endereco
+        };
+
+        try {
+          if (isEditMode) {
+            // Lógica de ATUALIZAÇÃO (PUT/PATCH)
+            await axios.post(
+              `${import.meta.env.VITE_URL_SERVER}/clientes/${dadosCliente.id_cliente}`,
+              payload
+            );
+          } else {
+            // Lógica de CRIAÇÃO (POST)
+            await axios.post(`${import.meta.env.VITE_URL_SERVER}/clientes`, payload);
+          }
+          // Recarregar os dados após o sucesso
+          // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
+          const response = await axios.get(
+            `${import.meta.env.VITE_URL_SERVER}/clientes`
+          );
+          setPaciente(response.data || []);
+          return true;
+        } catch (error) {
+          Swal.fire({
+            title: "Erro",
+            text: `Erro ao salvar: ${error}`,
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+          });
+          return false;
+        }
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Salvo!",
+          text: "O cliente foi salvo com sucesso.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
+        });
+      }
+    });
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -106,7 +251,7 @@ const Pacientes: React.FC = () => {
             text="Novo Paciente"
             icon={faPlus}
             color="bg-color-primary"
-          // onClick={() => abrirModal()}
+            onClick={() => abrirModal()}
           />
         </div>
       </div>
@@ -160,8 +305,7 @@ const Pacientes: React.FC = () => {
               <tr
                 key={row.id}
                 className="cursor-pointer hover:bg-gray-50"
-              // aqui você pode abrir modal com detalhes
-              // onClick={() => abrirModal(row.original)}
+                onClick={() => abrirModal(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2 text-sm text-gray-800">
