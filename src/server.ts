@@ -14,7 +14,7 @@ app.register(cors, {
 
 app.register(registerAllRoutes);
 
-const PORT = 8888;
+const PORT = 8123;
 
 app.listen({ port: PORT, host: "0.0.0.0" }).then(() => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
