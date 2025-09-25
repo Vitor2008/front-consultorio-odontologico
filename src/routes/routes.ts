@@ -37,10 +37,18 @@ async function loginRoutes(app: FastifyInstance) {
   app.post("/", loginController.login); // Alterado para "/" já que o prefixo será "/login"
 }
 
+async function statusRoutes(app: FastifyInstance) {
+    // API Status
+    app.get("/", () => {
+      return {"status": "Rodando OK"}
+    })
+}
+
 export default function registerAllRoutes(app: FastifyInstance) {
   app.register(agendamentoRoutes, { prefix: "/agendamentos" });
   app.register(atendenteRoutes, { prefix: "/atendentes" });
   app.register(dentistaRoutes, { prefix: "/dentistas" });
   app.register(pacienteRoutes, { prefix: "/clientes" });
   app.register(loginRoutes, { prefix: "/login" });
+  app.register(statusRoutes, { prefix: "/status" });
 }
