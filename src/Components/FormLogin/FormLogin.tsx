@@ -24,7 +24,7 @@ const navigate = useNavigate();
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   setMensagem("Entrando...");
-  console.log("URL Base: ", import.meta.env.VITE_URL_SERVER)
+  // console.log("URL Base: ", import.meta.env.VITE_URL_SERVER)
 
   try {
     const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/login`, {

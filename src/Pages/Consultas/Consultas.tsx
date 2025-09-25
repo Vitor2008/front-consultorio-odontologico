@@ -80,11 +80,13 @@ const Consultas: React.FC = () => {
         setDentistas(resDentistas.data || []);
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
-        Swal.fire(
-          "Erro",
-          "Não foi possível carregar os dados da página.",
-          "error"
-        );
+        Swal.fire({
+            title: "Erro",
+            text: "Não foi possível carregar os dados da página.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+        });
       } finally {
         setLoading(false);
       }
@@ -309,9 +311,13 @@ const Consultas: React.FC = () => {
         ).value;
 
         if (!id_cliente || !id_dentista || !data || !hora_inicio || !hora_fim) {
-          Swal.showValidationMessage(
-            "Por favor, preencha todos os campos obrigatórios."
-          );
+          Swal.fire({
+              title: "Erro",
+              text: "Por favor, preencha todos os campos obrigatórios.",
+              customClass: {
+                confirmButton: 'bg-color-primary',
+              },
+          });
           return false;
         }
 
@@ -343,13 +349,25 @@ const Consultas: React.FC = () => {
           setAgendamentos(response.data || []);
           return true;
         } catch (error) {
-          Swal.showValidationMessage(`Erro ao salvar: ${error}`);
+          Swal.fire({
+              title: "Erro",
+              text: `Erro ao salvar: ${error}`,
+              customClass: {
+                confirmButton: 'bg-color-primary',
+              },
+          });
           return false;
         }
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire("Salvo!", "O agendamento foi salvo com sucesso.", "success");
+        Swal.fire({
+            title: "Salvo!",
+            text: "O agendamento foi salvo com sucesso.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+        });
       }
     });
   };

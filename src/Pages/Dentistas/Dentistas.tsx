@@ -34,11 +34,13 @@ const ListaDentistas: React.FC = () => {
         );
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
-        Swal.fire(
-          "Erro",
-          "Não foi possível carregar os dados da página.",
-          "error"
-        );
+        Swal.fire({
+            title: "Erro",
+            text: "Não foi possível carregar os dados da página.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+        });
       } finally {
         setLoading(false);
       }
