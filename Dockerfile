@@ -11,9 +11,6 @@ RUN npm install
 # Copia o resto do código fonte
 COPY . .
 
-# 👇 ADIÇÃO 1: Copie o nginx.conf para dentro desta etapa também
-COPY nginx.conf .
-
 # O script 'build' do seu package.json já deve rodar 'vite build'
 RUN npm run build:front
 

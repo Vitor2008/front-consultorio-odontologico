@@ -3,11 +3,8 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"npm:dev:front\" \"npm:dev:back\"",
-    "dev:front": "vite",
-    "dev:back": "tsx watch src/server.ts",
-    "build:front": "tsc && vite build",
-    "build:back": "tsc --project tsconfig.server.json",
+    "dev": "vite",
+    "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
