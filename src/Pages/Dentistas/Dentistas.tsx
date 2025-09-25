@@ -35,11 +35,11 @@ const ListaDentistas: React.FC = () => {
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
         Swal.fire({
-            title: "Erro",
-            text: "Não foi possível carregar os dados da página.",
-            customClass: {
-              confirmButton: 'bg-color-primary',
-            },
+          title: "Erro",
+          text: "Não foi possível carregar os dados da página.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
         });
       } finally {
         setLoading(false);
@@ -90,6 +90,150 @@ const ListaDentistas: React.FC = () => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const abrirModal = (dadosDentista: Partial<Dentistas> = {}) => {
+    const isEditMode = !!dadosDentista.id_dentista;
+
+    Swal.fire({
+      title: isEditMode ? "Editar Dentista" : "Novo Dentista",
+      html: `
+        <div class="modal grid grid-cols-1 gap-4 text-left">
+          <div>
+            <label for="nomeDentista" class="block font-medium text-gray-700">Nome Completo:*</label>
+            <input type="text" id="nomeDentista" class="border rounded-md p-2 w-full" />
+          </div>
+          <div class="flex items-center gap-4">
+            <div>
+              <label for="campoCro" class="block font-medium text-gray-700">CRO:*</label>
+              <input type="text" id="campoCro" class="border rounded-md p-2 w-full" />
+            </div>
+            <div class="input-data">
+              <label for="dataNascimentoDentista" class="block font-medium text-gray-700">Data Nascimento:*</label>
+              <input type="date" id="dataNascimentoDentista" class="border rounded-md p-2 w-full" />
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div>
+              <label for="campoTelefoneDentista" class="block font-medium text-gray-700">Telefone:*</label>
+              <input type="number" id="campoTelefoneDentista" class="border rounded-md p-2 w-full" />
+            </div>
+            <div class="input-data">
+              <label for="dataCadastroDentista" class="block font-medium text-gray-700">Data Cadastro:*</label>
+              <input type="date" id="dataCadastroDentista" class="border rounded-md p-2 w-full" disabled />
+            </div>
+          </div>
+          <div>
+            <label for="campoEnderecoDentista" class="block font-medium text-gray-700">Endereço:*:</label>
+            <textarea id="campoEnderecoDentista" class="border w-full" row="3"></textarea>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: 'bg-color-primary',
+        cancelButton: 'bg-color-secondary'
+      },
+      didOpen: () => {
+        // Preenche os campos se estiver no modo de edição
+        if (isEditMode) {
+          (document.getElementById("nomeDentista") as HTMLSelectElement).value =
+            String(dadosDentista.nome_completo || "");
+          (
+            document.getElementById("campoCro") as HTMLSelectElement
+          ).value = String(dadosDentista.cro || "");
+          (document.getElementById("campoTelefoneDentista") as HTMLSelectElement).value =
+            dadosDentista.telefone || "";
+          (document.getElementById("campoEnderecoDentista") as HTMLSelectElement).value =
+            dadosDentista.endereco || "";
+          (document.getElementById("dataNascimentoDentista") as HTMLInputElement).value =
+            format(parseISO(dadosDentista.data_nascimento!), "yyyy-MM-dd");
+          (document.getElementById("dataCadastroDentista") as HTMLInputElement).value =
+            format(parseISO(dadosDentista.data_cadastro!), "yyyy-MM-dd");
+        }
+      },
+      preConfirm: async () => {
+        // 6. Lógica de confirmação para enviar os dados corretos para a API
+        const nome_completo = (
+          document.getElementById("nomeDentista") as HTMLSelectElement
+        ).value;
+        const cro = (
+          document.getElementById("campoCro") as HTMLSelectElement
+        ).value;
+        const data_nascimento = (document.getElementById("dataNascimentoDentista") as HTMLInputElement)
+          .value;
+        const telefone = (
+          document.getElementById("campoTelefoneDentista") as HTMLInputElement
+        ).value;
+        const data_cadastro = (
+          document.getElementById("dataCadastroDentista") as HTMLInputElement
+        ).value;
+        const endereco = (
+          document.getElementById("campoEnderecoDentista") as HTMLSelectElement
+        ).value;
+
+        if (!nome_completo || !cro || !data_nascimento || !telefone || !endereco) {
+          Swal.fire({
+            title: "Erro",
+            text: "Por favor, preencha todos os campos obrigatórios.",
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+          });
+          return false;
+        }
+
+        const payload = {
+          nome_completo,
+          cro,
+          telefone,
+          endereco,
+          data_nascimento,
+          data_cadastro
+        };
+
+        try {
+          if (isEditMode) {
+            // Lógica de ATUALIZAÇÃO (PUT/PATCH)
+            await axios.post(
+              `${import.meta.env.VITE_URL_SERVER}/dentistas/${dadosDentista.id_dentista}`,
+              payload
+            );
+          } else {
+            // Lógica de CRIAÇÃO (POST)
+            await axios.post(`${import.meta.env.VITE_URL_SERVER}/dentistas`, payload);
+          }
+          // Recarregar os dados após o sucesso
+          // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
+          const response = await axios.get(
+            `${import.meta.env.VITE_URL_SERVER}/dentistas`
+          );
+          setDentistas(response.data || []);
+          return true;
+        } catch (error) {
+          Swal.fire({
+            title: "Erro",
+            text: `Erro ao salvar: ${error}`,
+            customClass: {
+              confirmButton: 'bg-color-primary',
+            },
+          });
+          return false;
+        }
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Salvo!",
+          text: "O cliente foi salvo com sucesso.",
+          customClass: {
+            confirmButton: 'bg-color-primary',
+          },
+        });
+      }
+    });
+  };
+
   if (loading) {
     return <div><Loader /></div>;
   }
@@ -106,7 +250,7 @@ const ListaDentistas: React.FC = () => {
             text="Novo Dentista"
             icon={faPlus}
             color="bg-color-primary"
-          // onClick={() => abrirModal()}
+            onClick={() => abrirModal()}
           />
         </div>
       </div>
@@ -160,8 +304,7 @@ const ListaDentistas: React.FC = () => {
               <tr
                 key={row.id}
                 className="cursor-pointer hover:bg-gray-50"
-              // aqui você pode abrir modal com detalhes
-              // onClick={() => abrirModal(row.original)}
+                onClick={() => abrirModal(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2 text-sm text-gray-800">
