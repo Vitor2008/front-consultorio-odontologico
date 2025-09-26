@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 import { isAfter, isBefore, format, parseISO } from "date-fns";
 import Loader from "../../Components/Loader/Loader";
 import api from "../../api/api";
+import { formatarHora } from "../../Helper/FormatarHour"
 
 // 1. Interfaces atualizadas para corresponder ao backend
 interface Cliente {
@@ -141,12 +142,13 @@ const Consultas: React.FC = () => {
         accessorKey: "data_hora_inicio_hora",
         header: "Início",
         cell: (info) =>
-          format(parseISO(info.row.original.data_hora_inicio), "HH:mm"),
+          formatarHora(info.row.original.data_hora_inicio),
       },
       {
         accessorKey: "data_hora_fim",
         header: "Término",
-        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
+        cell: (info) =>
+          formatarHora(info.getValue() as string),
       },
       { accessorKey: "nome_cliente", header: "Paciente" },
       { accessorKey: "nome_dentista", header: "Dentista" },
@@ -217,11 +219,11 @@ const Consultas: React.FC = () => {
             <select id="campoCliente" class="border rounded-md p-2 w-full">
               <option value="">Selecione o paciente</option>
               ${clientes
-                .map(
-                  (c) =>
-                    `<option value="${c.id_cliente}">${c.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (c) =>
+              `<option value="${c.id_cliente}">${c.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -229,11 +231,11 @@ const Consultas: React.FC = () => {
             <select id="campoDentista" class="border rounded-md p-2 w-full">
               <option value="">Selecione o dentista</option>
               ${dentistas
-                .map(
-                  (d) =>
-                    `<option value="${d.id_dentista}">${d.nome_completo}</option>`
-                )
-                .join("")}
+          .map(
+            (d) =>
+              `<option value="${d.id_dentista}">${d.nome_completo}</option>`
+          )
+          .join("")}
             </select>
           </div>
           <div>
@@ -290,12 +292,9 @@ const Consultas: React.FC = () => {
             format(parseISO(dadosAgendamento.data_hora_inicio!), "yyyy-MM-dd");
           (
             document.getElementById("campoHoraInicio") as HTMLInputElement
-          ).value = format(
-            parseISO(dadosAgendamento.data_hora_inicio!),
-            "HH:mm"
-          );
+          ).value = formatarHora(dadosAgendamento.data_hora_inicio!);
           (document.getElementById("campoHoraFim") as HTMLInputElement).value =
-            format(parseISO(dadosAgendamento.data_hora_fim!), "HH:mm");
+            formatarHora(dadosAgendamento.data_hora_fim!);
           (document.getElementById("campoStatus") as HTMLSelectElement).value =
             dadosAgendamento.status_agendamento || "Agendado";
           (document.getElementById("campoValor") as HTMLSelectElement).value =
