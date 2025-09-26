@@ -1,8 +1,11 @@
+import React, { useState, useEffect } from "react";
 import "../Consultas/Consultas.css";
 import './Financeiro.css'
 import { faDollarSign, faFilter } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
+import Loader from "../../Components/Loader/Loader";
+import api from "../../api/api";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,30 +16,73 @@ import {
     Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import Swal from "sweetalert2";
+import type { Agendamentos } from "../../models/Agendamento";
 
+const Financeiro: React.FC = () => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [dadosRelatorio, setDadosRelatorio] = useState<Agendamentos[]>([]);
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+    useEffect(() => {
+        const fetchRelatorio = async () => {
+            try {
+                const response = await api.get<Agendamentos[]>("/agendamentos");
+                setDadosRelatorio(response.data);
+            } catch (error) {
+                console.error("Erro ao buscar dados iniciais:", error);
+                Swal.fire({
+                    title: "Erro",
+                    text: "Não foi possível carregar os dados da página.",
+                    customClass: {
+                        confirmButton: "bg-color-primary",
+                    },
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-const dadosGrafico = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-    datasets: [
-        {
-            label: 'Faturamento',
-            data: [1200, 1900, 800, 1500, 2200],
-            backgroundColor: '#04B4EA'
+        fetchRelatorio();
+    }, []);
+
+    ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+    const dadosGrafico = {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        datasets: [
+            {
+                label: 'Faturamento',
+                data: [1200, 1900, 800, 1500, 2200],
+                backgroundColor: '#04B4EA'
+            }
+        ]
+    };
+
+    const opcoesGrafico = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' as const },
+            title: { display: true, text: 'Faturamento' }
         }
-    ]
-};
+    };
 
-const opcoesGrafico = {
-    responsive: true,
-    plugins: {
-        legend: { position: 'top' as const },
-        title: { display: true, text: 'Faturamento' }
+
+    const totalRecebido = dadosRelatorio
+        .filter(a => a.status_pagamento === "Pago" && a.valor_consulta)
+        .reduce((acc, curr) => acc + (curr.valor_consulta ?? 0), 0);
+
+    const numeroAgendamentos = dadosRelatorio.length;
+
+    const ticketMedio = numeroAgendamentos > 0 ? (totalRecebido / numeroAgendamentos) : 0;
+
+
+    if (loading) {
+        return (
+            <div>
+                <Loader />
+            </div>
+        );
     }
-};
-
-const Financeiro = () => {
 
     return (
         <div className="financeiro-page">
@@ -79,7 +125,7 @@ const Financeiro = () => {
                         </div>
                         <div className="info-resumo flex flex-col">
                             <span className="font-bold">Total:</span>
-                            <span className="color-primary font-bold">R$ 540,00</span>
+                            <span className="color-primary font-bold">R$ {totalRecebido.toFixed(2)}</span>
                         </div>
                     </div>
                     <div className="card flex gap-2 bg-white px-2 py-3 shadow justify-start items-center">
@@ -88,7 +134,7 @@ const Financeiro = () => {
                         </div>
                         <div className="info-resumo flex flex-col">
                             <span className="font-bold">Nº Agendamentos</span>
-                            <span className="color-primary font-bold">20</span>
+                            <span className="color-primary font-bold">{numeroAgendamentos}</span>
                         </div>
                     </div>
                     <div className="card flex gap-2 bg-white px-2 py-3 shadow justify-start items-center">
@@ -97,7 +143,7 @@ const Financeiro = () => {
                         </div>
                         <div className="info-resumo flex flex-col">
                             <span className="font-bold">Ticket Médio:</span>
-                            <span className="color-primary font-bold">R$ 40,00</span>
+                            <span className="color-primary font-bold">R$ {ticketMedio.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FormLogin.css";
+import api from "../../api/api";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import type { LoginResponse } from "../../models/Login";
@@ -56,17 +57,16 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
     setMensagem("Cadastrando...");
 
     try {
-      // const response = await axios.post(
-      //   `R${import.meta.env.VITE_URL_SERVER}/atendentes`,
-      //   {
-      //     nome_completo: nome,
-      //     email_login: email,
-      //     telefone,
-      //     cpf,
-      //     data_nascimento: dataNascimento,
-      //     senha_plana: senha,
-      //   }
-      // );
+      const payload = {
+        nome_completo: nome,
+        email_login: email,
+        telefone,
+        cpf,
+        data_nascimento: dataNascimento,
+        senha_plana: senha,
+      };
+
+      await api.post("/atendentes", payload);
 
       setMensagem("Agora você pode fazer o login!");
       onTrocarTipo();
@@ -128,11 +128,11 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       </button>
       {mensagem && <p className="error-message">{mensagem}</p>}
       {/* <p className="signin">
-      Ainda não tem uma conta?{" "}
-      <a href="#" onClick={onTrocarTipo}>
-        Criar Conta
-      </a>{" "}
-    </p> */}
+        Ainda não tem uma conta?{" "}
+        <a href="#" onClick={onTrocarTipo}>
+          Criar Conta
+        </a>{" "}
+      </p> */}
     </form>
   ) : (
     <form className="form form-register" onSubmit={handleCadastro}>
