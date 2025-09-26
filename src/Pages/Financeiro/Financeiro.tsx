@@ -46,15 +46,27 @@ const Financeiro: React.FC = () => {
     }, []);
 
     ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+    const listaStatusAgendamento = dadosRelatorio.map(agendamento => agendamento.status_agendamento);
+    const listaValorAgendamento = dadosRelatorio.map(agendamento => agendamento.valor_consulta);
+
+
+    const coresPorStatus: Record<string, string> = {
+        "Agendado": "oklch(79.5% 0.184 86.047)",
+        "Confirmado": "oklch(48.8% 0.243 264.376)",
+        "Cancelado Pelo Paciente": "oklch(57.7% 0.245 27.325)",
+        "Realizado": "oklch(44.8% 0.119 151.328)"
+    };
+
+    const listaCores = listaStatusAgendamento.map(status => coresPorStatus[status] || "#999999");
 
     const dadosGrafico = {
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        labels: listaStatusAgendamento,
         datasets: [
             {
-                label: 'Faturamento',
-                data: [1200, 1900, 800, 1500, 2200],
-                backgroundColor: '#04B4EA'
-            }
+                label: 'Valor Consulta',
+                data: listaValorAgendamento,
+                backgroundColor: listaCores
+            },
         ]
     };
 
@@ -62,19 +74,30 @@ const Financeiro: React.FC = () => {
         responsive: true,
         plugins: {
             legend: { position: 'top' as const },
-            title: { display: true, text: 'Faturamento' }
+            title: { display: true, text: 'Consultas' }
         }
     };
 
 
+    // const totalRecebido = dadosRelatorio
+    //     .filter(a => a.status_pagamento === "Pendente" && a.valor_consulta)
+    //     .reduce((acc, curr) => {
+    //         const valor = typeof curr.valor_consulta === "string"
+    //             ? parseFloat(curr.valor_consulta.replace(",", "."))
+    //             : curr.valor_consulta ?? 0;
+    //         return acc + valor;
+    //     }, 0);
+
     const totalRecebido = dadosRelatorio
-        .filter(a => a.status_pagamento === "Pago" && a.valor_consulta)
-        .reduce((acc, curr) => acc + (curr.valor_consulta ?? 0), 0);
+        .reduce((acc, curr) => {
+            const valor = typeof curr.valor_consulta === "string"
+                ? parseFloat(curr.valor_consulta.replace(",", "."))
+                : curr.valor_consulta ?? 0;
+            return acc + valor;
+        }, 0);
 
     const numeroAgendamentos = dadosRelatorio.length;
-
     const ticketMedio = numeroAgendamentos > 0 ? (totalRecebido / numeroAgendamentos) : 0;
-
 
     if (loading) {
         return (
