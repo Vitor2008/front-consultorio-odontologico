@@ -26,6 +26,14 @@ const ListaDentistas: React.FC = () => {
   const [dentistas, setDentistas] = useState<Dentistas[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [nomeInput, setNomeInput] = useState("");
+  const [croInput, setCroInput] = useState("");
+
+  const [filtros, setFiltros] = useState({
+    nome: "",
+    cro: "",
+  });
+
   useEffect(() => {
     const fetchDentistas = async () => {
       try {
@@ -46,6 +54,20 @@ const ListaDentistas: React.FC = () => {
 
     fetchDentistas();
   }, []);
+
+  const dentistasFiltrados = useMemo(() => {
+    return dentistas.filter((d) => {
+      const matchNome = filtros.nome
+        ? d.nome_completo.toLowerCase().includes(filtros.nome.toLowerCase())
+        : true;
+
+      const matchCro = filtros.cro
+        ? d.cro.toLowerCase().includes(filtros.cro.toLowerCase())
+        : true;
+
+      return matchNome && matchCro;
+    });
+  }, [dentistas, filtros]);
 
   const columns = useMemo<ColumnDef<Dentistas>[]>(
     () => [
@@ -80,13 +102,20 @@ const ListaDentistas: React.FC = () => {
   });
 
   const table = useReactTable({
-    data: dentistas,
+    data: dentistasFiltrados,
     columns,
     state: { pagination },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const handlePesquisar = () => {
+    setFiltros({
+      nome: nomeInput,
+      cro: croInput,
+    });
+  };
 
   const abrirModal = (dadosDentista: Partial<Dentistas> = {}) => {
     const isEditMode = !!dadosDentista.id_dentista;
@@ -275,23 +304,23 @@ const ListaDentistas: React.FC = () => {
       <div className="filtros max-w-7xl mx-auto mt-6 gap-4">
         <input
           type="text"
-          // value={pacienteInput}
-          // onChange={(e) => setPacienteInput(e.target.value)}
+          value={nomeInput}
+          onChange={(e) => setNomeInput(e.target.value)}
           placeholder="Nome do Dentista"
           className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <input
           type="number"
-          // value={dentistaInput}
-          // onChange={(e) => setDentistaInput(e.target.value)}
-          placeholder="Cpf do Dentista"
+          value={croInput}
+          onChange={(e) => setCroInput(e.target.value)}
+          placeholder="CRO do Dentista"
           className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <Button
           text="Pesquisar"
           icon={faSearch}
           color="bg-color-primary"
-          // onClick={handlePesquisar}
+          onClick={handlePesquisar}
         />
       </div>
 

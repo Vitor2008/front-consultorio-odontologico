@@ -24,8 +24,16 @@ import { format, parseISO } from "date-fns";
 import Swal from "sweetalert2";
 
 const Pacientes: React.FC = () => {
-  const [paciente, setPaciente] = useState<Cliente[]>([]);
+  const [pacientes, setPaciente] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [nomeInput, setNomeInput] = useState("");
+  const [cpfInput, setCpfInput] = useState("");
+
+  const [filtros, setFiltros] = useState({
+    nome: "",
+    cpf: "",
+  });
 
   useEffect(() => {
     const fetchPaciente = async () => {
@@ -47,6 +55,20 @@ const Pacientes: React.FC = () => {
 
     fetchPaciente();
   }, []);
+
+  const pacientesFiltrados = useMemo(() => {
+    return pacientes.filter((d) => {
+      const matchNome = filtros.nome
+        ? d.nome_completo.toLowerCase().includes(filtros.nome.toLowerCase())
+        : true;
+
+      const matchCro = filtros.cpf
+        ? d.cpf.toLowerCase().includes(filtros.cpf.toLowerCase())
+        : true;
+
+      return matchNome && matchCro;
+    });
+  }, [pacientes, filtros]);
 
   const columns = useMemo<ColumnDef<Cliente>[]>(
     () => [
@@ -81,13 +103,20 @@ const Pacientes: React.FC = () => {
   });
 
   const table = useReactTable({
-    data: paciente,
+    data: pacientesFiltrados,
     columns,
     state: { pagination },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const handlePesquisar = () => {
+    setFiltros({
+      nome: nomeInput,
+      cpf: cpfInput,
+    });
+  };
 
   const abrirModal = (dadosCliente: Partial<Cliente> = {}) => {
     const isEditMode = !!dadosCliente.id_cliente;
@@ -264,15 +293,15 @@ const Pacientes: React.FC = () => {
       <div className="filtros max-w-7xl mx-auto mt-6 gap-4">
         <input
           type="text"
-          // value={pacienteInput}
-          // onChange={(e) => setPacienteInput(e.target.value)}
+          value={nomeInput}
+          onChange={(e) => setNomeInput(e.target.value)}
           placeholder="Nome do Paciente"
           className="border px-3 py-2 rounded input-filtro bg-white"
         />
         <input
           type="number"
-          // value={dentistaInput}
-          // onChange={(e) => setDentistaInput(e.target.value)}
+          value={cpfInput}
+          onChange={(e) => setCpfInput(e.target.value)}
           placeholder="Cpf do Paciente"
           className="border px-3 py-2 rounded input-filtro bg-white"
         />
@@ -280,7 +309,7 @@ const Pacientes: React.FC = () => {
           text="Pesquisar"
           icon={faSearch}
           color="bg-color-primary"
-          // onClick={handlePesquisar}
+          onClick={handlePesquisar}
         />
       </div>
 
