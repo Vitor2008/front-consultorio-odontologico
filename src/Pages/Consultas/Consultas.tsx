@@ -5,7 +5,7 @@ import {
   faSearch,
   faHospitalUser,
   faArrowLeft,
-  faArrowRight
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -18,8 +18,8 @@ import {
 } from "@tanstack/react-table";
 import Swal from "sweetalert2";
 import { isAfter, isBefore, format, parseISO } from "date-fns";
-import axios from "axios";
 import Loader from "../../Components/Loader/Loader";
+import api from "../../api/api";
 
 // 1. Interfaces atualizadas para corresponder ao backend
 interface Cliente {
@@ -39,7 +39,7 @@ interface Agendamento {
   data_hora_inicio: string;
   data_hora_fim: string;
   status_agendamento: string;
-  valor_consulta: string,
+  valor_consulta: string;
   observacoes?: string;
   // Adicionamos os nomes para facilitar a exibição na tabela
   nome_cliente?: string;
@@ -71,9 +71,9 @@ const Consultas: React.FC = () => {
       try {
         // Usamos Promise.all para fazer as requisições em paralelo
         const [resAgendamentos, resClientes, resDentistas] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_URL_SERVER}/agendamentos`),
-          axios.get(`${import.meta.env.VITE_URL_SERVER}/clientes`),
-          axios.get(`${import.meta.env.VITE_URL_SERVER}/dentistas`),
+          api.get("/agendamentos"),
+          api.get("/clientes"),
+          api.get("/dentistas"),
         ]);
 
         setAgendamentos(resAgendamentos.data || []);
@@ -85,7 +85,7 @@ const Consultas: React.FC = () => {
           title: "Erro",
           text: "Não foi possível carregar os dados da página.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       } finally {
@@ -146,8 +146,7 @@ const Consultas: React.FC = () => {
       {
         accessorKey: "data_hora_fim",
         header: "Término",
-        cell: (info) =>
-          format(parseISO(info.getValue() as string), "HH:mm"),
+        cell: (info) => format(parseISO(info.getValue() as string), "HH:mm"),
       },
       { accessorKey: "nome_cliente", header: "Paciente" },
       { accessorKey: "nome_dentista", header: "Dentista" },
@@ -218,11 +217,11 @@ const Consultas: React.FC = () => {
             <select id="campoCliente" class="border rounded-md p-2 w-full">
               <option value="">Selecione o paciente</option>
               ${clientes
-          .map(
-            (c) =>
-              `<option value="${c.id_cliente}">${c.nome_completo}</option>`
-          )
-          .join("")}
+                .map(
+                  (c) =>
+                    `<option value="${c.id_cliente}">${c.nome_completo}</option>`
+                )
+                .join("")}
             </select>
           </div>
           <div>
@@ -230,11 +229,11 @@ const Consultas: React.FC = () => {
             <select id="campoDentista" class="border rounded-md p-2 w-full">
               <option value="">Selecione o dentista</option>
               ${dentistas
-          .map(
-            (d) =>
-              `<option value="${d.id_dentista}">${d.nome_completo}</option>`
-          )
-          .join("")}
+                .map(
+                  (d) =>
+                    `<option value="${d.id_dentista}">${d.nome_completo}</option>`
+                )
+                .join("")}
             </select>
           </div>
           <div>
@@ -276,8 +275,8 @@ const Consultas: React.FC = () => {
       confirmButtonText: "Salvar",
       cancelButtonText: "Cancelar",
       customClass: {
-        confirmButton: 'bg-color-primary',
-        cancelButton: 'bg-color-secondary'
+        confirmButton: "bg-color-primary",
+        cancelButton: "bg-color-secondary",
       },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
@@ -301,8 +300,9 @@ const Consultas: React.FC = () => {
             dadosAgendamento.status_agendamento || "Agendado";
           (document.getElementById("campoValor") as HTMLSelectElement).value =
             dadosAgendamento.valor_consulta || "";
-          (document.getElementById("campoObervacao") as HTMLSelectElement).value =
-            dadosAgendamento.observacoes || "";
+          (
+            document.getElementById("campoObervacao") as HTMLSelectElement
+          ).value = dadosAgendamento.observacoes || "";
         }
       },
       preConfirm: async () => {
@@ -331,12 +331,19 @@ const Consultas: React.FC = () => {
           document.getElementById("campoObervacao") as HTMLSelectElement
         ).value;
 
-        if (!id_cliente || !id_dentista || !data || !hora_inicio || !hora_fim || !valor_consulta) {
+        if (
+          !id_cliente ||
+          !id_dentista ||
+          !data ||
+          !hora_inicio ||
+          !hora_fim ||
+          !valor_consulta
+        ) {
           Swal.fire({
             title: "Erro",
             text: "Por favor, preencha todos os campos obrigatórios.",
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -356,19 +363,17 @@ const Consultas: React.FC = () => {
         try {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
-            await axios.post(
-              `${import.meta.env.VITE_URL_SERVER}/agendamentos/${dadosAgendamento.id_agendamento}`,
+            await api.post(
+              `/agendamentos/${dadosAgendamento.id_agendamento}`,
               payload
             );
           } else {
             // Lógica de CRIAÇÃO (POST)
-            await axios.post(`${import.meta.env.VITE_URL_SERVER}/agendamentos`, payload);
+            await api.post(`/agendamentos`, payload);
           }
           // Recarregar os dados após o sucesso
           // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
-          const response = await axios.get(
-            `${import.meta.env.VITE_URL_SERVER}/agendamentos`
-          );
+          const response = await api.get(`/agendamentos`);
           setAgendamentos(response.data || []);
           return true;
         } catch (error) {
@@ -376,7 +381,7 @@ const Consultas: React.FC = () => {
             title: "Erro",
             text: `Erro ao salvar: ${error}`,
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -388,7 +393,7 @@ const Consultas: React.FC = () => {
           title: "Salvo!",
           text: "O agendamento foi salvo com sucesso.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       }
@@ -396,7 +401,11 @@ const Consultas: React.FC = () => {
   };
 
   if (loading) {
-    return <div><Loader /></div>;
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
   }
 
   return (
@@ -503,7 +512,8 @@ const Consultas: React.FC = () => {
         />
 
         <span className="text-sm">
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+          Página {table.getState().pagination.pageIndex + 1} de{" "}
+          {table.getPageCount()}
         </span>
 
         <Button

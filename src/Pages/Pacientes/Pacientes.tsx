@@ -2,14 +2,14 @@ import React, { useState, useMemo, useEffect } from "react";
 import "../Consultas/Consultas.css";
 import "./Pacientes.css";
 import type { Cliente } from "../../models/Cliente";
-import axios from "axios";
+import api from "../../api/api";
 import Loader from "../../Components/Loader/Loader";
 import {
   faPlus,
   faSearch,
   faHospitalUser,
   faArrowLeft,
-  faArrowRight
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -30,16 +30,14 @@ const Pacientes: React.FC = () => {
   useEffect(() => {
     const fetchPaciente = async () => {
       try {
-        setPaciente(
-          (await axios.get<Cliente[]>(`${import.meta.env.VITE_URL_SERVER}/clientes`)).data
-        );
+        setPaciente((await api.get<Cliente[]>(`/clientes`)).data);
       } catch (error) {
         console.error("Erro ao buscar dentistas:", error);
         Swal.fire({
           title: "Erro",
           text: "Não foi possível carregar os dados da página.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       } finally {
@@ -132,25 +130,30 @@ const Pacientes: React.FC = () => {
       confirmButtonText: "Salvar",
       cancelButtonText: "Cancelar",
       customClass: {
-        confirmButton: 'bg-color-primary',
-        cancelButton: 'bg-color-secondary'
+        confirmButton: "bg-color-primary",
+        cancelButton: "bg-color-secondary",
       },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
         if (isEditMode) {
           (document.getElementById("nomeCliente") as HTMLSelectElement).value =
             String(dadosCliente.nome_completo || "");
+          (document.getElementById("campoCpf") as HTMLSelectElement).value =
+            String(dadosCliente.cpf || "");
           (
-            document.getElementById("campoCpf") as HTMLSelectElement
-          ).value = String(dadosCliente.cpf || "");
-          (document.getElementById("dataNascimento") as HTMLInputElement).value =
-            format(parseISO(dadosCliente.data_nascimento!), "yyyy-MM-dd");
-          (document.getElementById("campoTelefone") as HTMLSelectElement).value =
-            dadosCliente.telefone || "";
+            document.getElementById("dataNascimento") as HTMLInputElement
+          ).value = format(
+            parseISO(dadosCliente.data_nascimento!),
+            "yyyy-MM-dd"
+          );
+          (
+            document.getElementById("campoTelefone") as HTMLSelectElement
+          ).value = dadosCliente.telefone || "";
           (document.getElementById("dataCadastro") as HTMLInputElement).value =
             format(parseISO(dadosCliente.data_cadastro!), "yyyy-MM-dd");
-          (document.getElementById("campoEndereco") as HTMLSelectElement).value =
-            dadosCliente.endereco || "";
+          (
+            document.getElementById("campoEndereco") as HTMLSelectElement
+          ).value = dadosCliente.endereco || "";
         }
       },
       preConfirm: async () => {
@@ -158,11 +161,11 @@ const Pacientes: React.FC = () => {
         const nome_completo = (
           document.getElementById("nomeCliente") as HTMLSelectElement
         ).value;
-        const cpf = (
-          document.getElementById("campoCpf") as HTMLSelectElement
-        ).value;
-        const data_nascimento = (document.getElementById("dataNascimento") as HTMLInputElement)
+        const cpf = (document.getElementById("campoCpf") as HTMLSelectElement)
           .value;
+        const data_nascimento = (
+          document.getElementById("dataNascimento") as HTMLInputElement
+        ).value;
         const telefone = (
           document.getElementById("campoTelefone") as HTMLInputElement
         ).value;
@@ -173,12 +176,18 @@ const Pacientes: React.FC = () => {
           document.getElementById("campoEndereco") as HTMLSelectElement
         ).value;
 
-        if (!nome_completo || !cpf || !data_nascimento || !telefone || !endereco) {
+        if (
+          !nome_completo ||
+          !cpf ||
+          !data_nascimento ||
+          !telefone ||
+          !endereco
+        ) {
           Swal.fire({
             title: "Erro",
             text: "Por favor, preencha todos os campos obrigatórios.",
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -190,25 +199,20 @@ const Pacientes: React.FC = () => {
           data_nascimento,
           telefone,
           data_cadastro,
-          endereco
+          endereco,
         };
 
         try {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
-            await axios.post(
-              `${import.meta.env.VITE_URL_SERVER}/clientes/${dadosCliente.id_cliente}`,
-              payload
-            );
+            await api.post(`/clientes/${dadosCliente.id_cliente}`, payload);
           } else {
             // Lógica de CRIAÇÃO (POST)
-            await axios.post(`${import.meta.env.VITE_URL_SERVER}/clientes`, payload);
+            await api.post(`/clientes`, payload);
           }
           // Recarregar os dados após o sucesso
           // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
-          const response = await axios.get(
-            `${import.meta.env.VITE_URL_SERVER}/clientes`
-          );
+          const response = await api.get(`/clientes`);
           setPaciente(response.data || []);
           return true;
         } catch (error) {
@@ -216,7 +220,7 @@ const Pacientes: React.FC = () => {
             title: "Erro",
             text: `Erro ao salvar: ${error}`,
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -228,7 +232,7 @@ const Pacientes: React.FC = () => {
           title: "Salvo!",
           text: "O cliente foi salvo com sucesso.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       }
@@ -276,7 +280,7 @@ const Pacientes: React.FC = () => {
           text="Pesquisar"
           icon={faSearch}
           color="bg-color-primary"
-        // onClick={handlePesquisar}
+          // onClick={handlePesquisar}
         />
       </div>
 
@@ -331,7 +335,8 @@ const Pacientes: React.FC = () => {
         />
 
         <span className="text-sm">
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+          Página {table.getState().pagination.pageIndex + 1} de{" "}
+          {table.getPageCount()}
         </span>
 
         <Button

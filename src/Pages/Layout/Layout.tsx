@@ -18,9 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="layout-content">
         <header className="layout-header">
           <span>
-            {user
-              ? `Bem-vindo, ${user.nome_completo}`
-              : "Nenhum usuário logado"}
+            {user ? `Bem-vindo, ${user.nome}` : "Nenhum usuário logado"}
           </span>
           <Button
             onClick={logout}

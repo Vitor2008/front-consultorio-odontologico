@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./FormLogin.css";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
+import type { LoginResponse } from "../../models/Login";
 
 interface FormLoginProps {
   tipo: "login" | "register";
@@ -26,15 +27,20 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
     // setMensagem("Entrando...");
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/login`, {
-        email,
-        senha_plana: senha,
-      });
+      const response = (
+        await axios.post<LoginResponse>(
+          `${import.meta.env.VITE_URL_SERVER}/login`,
+          {
+            email,
+            senha_plana: senha,
+          }
+        )
+      ).data;
 
-      const resposta = response.data;
-      login(resposta.data);
-      setMensagem(resposta.message);
-      localStorage.setItem("usuario", JSON.stringify(resposta.usuario));
+      login(response);
+      setMensagem(response.message);
+      localStorage.setItem("usuario", JSON.stringify(response.dados));
+      localStorage.setItem("authToken", response.token);
       navigate("/consultas");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -89,7 +95,6 @@ const FormLogin: React.FC<FormLoginProps> = ({ tipo, onTrocarTipo }) => {
       window.removeEventListener("keydown", limparMensagem);
     };
   }, [mensagem]);
-
 
   return tipo === "login" ? (
     <form className="form card-form-login" onSubmit={handleLogin}>

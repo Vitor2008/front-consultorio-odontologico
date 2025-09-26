@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import '../Consultas/Consultas.css'
-import axios from "axios";
+import "../Consultas/Consultas.css";
+import api from "../../api/api";
 import type { Dentistas } from "../../models/Dentistas";
 import Loader from "../../Components/Loader/Loader";
 import {
@@ -8,7 +8,7 @@ import {
   faSearch,
   faUserNurse,
   faArrowLeft,
-  faArrowRight
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "../../Components/Button/Button";
@@ -29,16 +29,14 @@ const ListaDentistas: React.FC = () => {
   useEffect(() => {
     const fetchDentistas = async () => {
       try {
-        setDentistas(
-          (await axios.get<Dentistas[]>(`${import.meta.env.VITE_URL_SERVER}/dentistas`)).data
-        );
+        setDentistas((await api.get<Dentistas[]>(`/dentistas`)).data);
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
         Swal.fire({
           title: "Erro",
           text: "Não foi possível carregar os dados da página.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       } finally {
@@ -131,25 +129,40 @@ const ListaDentistas: React.FC = () => {
       confirmButtonText: "Salvar",
       cancelButtonText: "Cancelar",
       customClass: {
-        confirmButton: 'bg-color-primary',
-        cancelButton: 'bg-color-secondary'
+        confirmButton: "bg-color-primary",
+        cancelButton: "bg-color-secondary",
       },
       didOpen: () => {
         // Preenche os campos se estiver no modo de edição
         if (isEditMode) {
           (document.getElementById("nomeDentista") as HTMLSelectElement).value =
             String(dadosDentista.nome_completo || "");
+          (document.getElementById("campoCro") as HTMLSelectElement).value =
+            String(dadosDentista.cro || "");
           (
-            document.getElementById("campoCro") as HTMLSelectElement
-          ).value = String(dadosDentista.cro || "");
-          (document.getElementById("campoTelefoneDentista") as HTMLSelectElement).value =
-            dadosDentista.telefone || "";
-          (document.getElementById("campoEnderecoDentista") as HTMLSelectElement).value =
-            dadosDentista.endereco || "";
-          (document.getElementById("dataNascimentoDentista") as HTMLInputElement).value =
-            format(parseISO(dadosDentista.data_nascimento!), "yyyy-MM-dd");
-          (document.getElementById("dataCadastroDentista") as HTMLInputElement).value =
-            format(parseISO(dadosDentista.data_cadastro!), "yyyy-MM-dd");
+            document.getElementById(
+              "campoTelefoneDentista"
+            ) as HTMLSelectElement
+          ).value = dadosDentista.telefone || "";
+          (
+            document.getElementById(
+              "campoEnderecoDentista"
+            ) as HTMLSelectElement
+          ).value = dadosDentista.endereco || "";
+          (
+            document.getElementById(
+              "dataNascimentoDentista"
+            ) as HTMLInputElement
+          ).value = format(
+            parseISO(dadosDentista.data_nascimento!),
+            "yyyy-MM-dd"
+          );
+          (
+            document.getElementById("dataCadastroDentista") as HTMLInputElement
+          ).value = format(
+            parseISO(dadosDentista.data_cadastro!),
+            "yyyy-MM-dd"
+          );
         }
       },
       preConfirm: async () => {
@@ -157,11 +170,11 @@ const ListaDentistas: React.FC = () => {
         const nome_completo = (
           document.getElementById("nomeDentista") as HTMLSelectElement
         ).value;
-        const cro = (
-          document.getElementById("campoCro") as HTMLSelectElement
-        ).value;
-        const data_nascimento = (document.getElementById("dataNascimentoDentista") as HTMLInputElement)
+        const cro = (document.getElementById("campoCro") as HTMLSelectElement)
           .value;
+        const data_nascimento = (
+          document.getElementById("dataNascimentoDentista") as HTMLInputElement
+        ).value;
         const telefone = (
           document.getElementById("campoTelefoneDentista") as HTMLInputElement
         ).value;
@@ -172,12 +185,18 @@ const ListaDentistas: React.FC = () => {
           document.getElementById("campoEnderecoDentista") as HTMLSelectElement
         ).value;
 
-        if (!nome_completo || !cro || !data_nascimento || !telefone || !endereco) {
+        if (
+          !nome_completo ||
+          !cro ||
+          !data_nascimento ||
+          !telefone ||
+          !endereco
+        ) {
           Swal.fire({
             title: "Erro",
             text: "Por favor, preencha todos os campos obrigatórios.",
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -189,25 +208,18 @@ const ListaDentistas: React.FC = () => {
           telefone,
           endereco,
           data_nascimento,
-          data_cadastro
+          data_cadastro,
         };
 
         try {
           if (isEditMode) {
             // Lógica de ATUALIZAÇÃO (PUT/PATCH)
-            await axios.post(
-              `${import.meta.env.VITE_URL_SERVER}/dentistas/${dadosDentista.id_dentista}`,
-              payload
-            );
+            await api.post(`/dentistas/${dadosDentista.id_dentista}`, payload);
           } else {
             // Lógica de CRIAÇÃO (POST)
-            await axios.post(`${import.meta.env.VITE_URL_SERVER}/dentistas`, payload);
+            await api.post(`/dentistas`, payload);
           }
-          // Recarregar os dados após o sucesso
-          // (idealmente, apenas adiciona o novo item ao estado ou atualiza o item existente)
-          const response = await axios.get(
-            `${import.meta.env.VITE_URL_SERVER}/dentistas`
-          );
+          const response = await api.get(`/dentistas`);
           setDentistas(response.data || []);
           return true;
         } catch (error) {
@@ -215,7 +227,7 @@ const ListaDentistas: React.FC = () => {
             title: "Erro",
             text: `Erro ao salvar: ${error}`,
             customClass: {
-              confirmButton: 'bg-color-primary',
+              confirmButton: "bg-color-primary",
             },
           });
           return false;
@@ -227,7 +239,7 @@ const ListaDentistas: React.FC = () => {
           title: "Salvo!",
           text: "O cliente foi salvo com sucesso.",
           customClass: {
-            confirmButton: 'bg-color-primary',
+            confirmButton: "bg-color-primary",
           },
         });
       }
@@ -235,7 +247,11 @@ const ListaDentistas: React.FC = () => {
   };
 
   if (loading) {
-    return <div><Loader /></div>;
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
   }
 
   return (
@@ -275,7 +291,7 @@ const ListaDentistas: React.FC = () => {
           text="Pesquisar"
           icon={faSearch}
           color="bg-color-primary"
-        // onClick={handlePesquisar}
+          // onClick={handlePesquisar}
         />
       </div>
 
@@ -330,7 +346,8 @@ const ListaDentistas: React.FC = () => {
         />
 
         <span className="text-sm">
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+          Página {table.getState().pagination.pageIndex + 1} de{" "}
+          {table.getPageCount()}
         </span>
 
         <Button
