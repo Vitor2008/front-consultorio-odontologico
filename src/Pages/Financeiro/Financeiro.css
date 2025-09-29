@@ -1,9 +1,9 @@
-.card-resumo .card{
+.card-resumo .card {
     border-radius: 10px;
     width: 200px;
 }
 
-.icon{
+.icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,4 +21,19 @@
 .grafico .card {
     border-radius: 10px;
     height: 100%;
+}
+
+
+@media (max-width: 768px) {
+    .relatorio {
+        flex-direction: column;
+    }
+
+    .card-resumo .card {
+        width: 100%;
+    }
+
+    .grafico {
+        width: 100%;
+    }
 }
